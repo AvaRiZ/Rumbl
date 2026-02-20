@@ -1,0 +1,12 @@
+<.header>
+  <%= @user.name %>
+  <:subtitle>@<%= @user.username %></:subtitle>
+</.header>
+
+<.list>
+  <:item title="Name"><%= @user.name %></:item>
+  <:item title="Username">@<%= @user.username %></:item>
+  <:item title="Member since"><%= Calendar.strftime(@user.inserted_at, "%B %d, %Y") %></:item>
+</.list>
+
+<.back navigate={~p"/users"}>Back to users</.back>

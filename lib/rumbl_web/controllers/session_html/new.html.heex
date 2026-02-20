@@ -1,0 +1,20 @@
+<.header>
+  Log In
+  <:subtitle>Welcome back to Rumbl!</:subtitle>
+</.header>
+
+<.simple_form :let={f} for={%{}} as={:session} action={~p"/sessions"}>
+  <.input field={f[:username]} type="text" label="Username" required />
+  <.input field={f[:password]} type="password" label="Password" required />
+
+  <:actions>
+    <.button>Log In</.button>
+  </:actions>
+</.simple_form>
+
+<p class="mt-4 text-sm text-gray-600">
+  Don't have an account?
+  <.link navigate={~p"/users/new"} class="font-semibold text-brand hover:underline">
+    Register
+  </.link>
+</p>

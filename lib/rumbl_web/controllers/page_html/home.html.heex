@@ -1,0 +1,48 @@
+<div class="min-h-[60vh] flex flex-col items-center justify-center text-center">
+  <h1 class="text-5xl font-bold text-brand mb-4">
+    Welcome to Rumbl
+  </h1>
+
+  <p class="text-xl text-base-content/70 max-w-2xl mb-8">
+    Watch videos together and share your thoughts in real-time.
+    Add annotations to videos and see what others think!
+  </p>
+
+  <div class="flex gap-4">
+    <%= if @current_user do %>
+      <a href="/videos" class="btn btn-primary btn-lg">
+        My Videos
+      </a>
+      <a href="/videos/new" class="btn btn-outline btn-lg">
+        Add Video
+      </a>
+    <% else %>
+      <a href="/users/new" class="btn btn-primary btn-lg">
+        Get Started
+      </a>
+      <a href="/sessions/new" class="btn btn-outline btn-lg">
+        Log In
+      </a>
+    <% end %>
+  </div>
+
+  <div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl">
+    <div class="card bg-base-200 p-6">
+      <div class="text-4xl mb-4">&#127916;</div>
+      <h3 class="text-lg font-semibold mb-2">Share Videos</h3>
+      <p class="text-base-content/70">Add YouTube videos and share them with the community.</p>
+    </div>
+
+    <div class="card bg-base-200 p-6">
+      <div class="text-4xl mb-4">&#128172;</div>
+      <h3 class="text-lg font-semibold mb-2">Real-time Annotations</h3>
+      <p class="text-base-content/70">Add comments at specific moments while watching videos.</p>
+    </div>
+
+    <div class="card bg-base-200 p-6">
+      <div class="text-4xl mb-4">&#128101;</div>
+      <h3 class="text-lg font-semibold mb-2">Watch Together</h3>
+      <p class="text-base-content/70">See annotations from other users in real-time.</p>
+    </div>
+  </div>
+</div>

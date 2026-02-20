@@ -1,0 +1,34 @@
+<.header>
+  My Videos
+  <:actions>
+    <.link navigate={~p"/videos/new"}>
+      <.button>Add Video</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table id="videos" rows={@videos}>
+  <:col :let={video} label="Title"><%= video.title %></:col>
+  <:col :let={video} label="Category">
+    <%= if video.category, do: video.category.name, else: "-" %>
+  </:col>
+  <:col :let={video} label="Added">
+    <%= Calendar.strftime(video.inserted_at, "%b %d, %Y") %>
+  </:col>
+  <:action :let={video}>
+    <.link navigate={~p"/watch/#{video}"}>Watch</.link>
+  </:action>
+  <:action :let={video}>
+    <.link navigate={~p"/videos/#{video}"}>View</.link>
+  </:action>
+  <:action :let={video}>
+    <.link navigate={~p"/videos/#{video}/edit"}>Edit</.link>
+  </:action>
+</.table>
+
+<%= if Enum.empty?(@videos) do %>
+  <p class="mt-8 text-center text-gray-500">
+    You haven't added any videos yet.
+    <.link navigate={~p"/videos/new"} class="text-brand hover:underline">Add your first video</.link>
+  </p>
+<% end %>

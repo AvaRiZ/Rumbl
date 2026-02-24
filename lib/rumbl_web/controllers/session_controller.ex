@@ -4,29 +4,28 @@ defmodule RumblWeb.SessionController do
   alias Rumbl.Accounts
   alias RumblWeb.Auth
 
-  def new(conn, _params) do
-    render(conn, :new)
-  end
-
-  def create(conn, %{"session" => %{"username" => username, "password" => password}}) do
-    case Accounts.authenticate_by_username_and_pass(username, password) do
+  def create(conn, %{"session" => session_params}) do
+    case Accounts.authenticate_by_username_and_pass(
+           session_params["username"],
+           session_params["password"]
+         ) do
       {:ok, user} ->
         conn
         |> Auth.login(user)
-        |> put_flash(:info, "Welcome back, #{user.name}!")
+        |> put_flash(:info, "Welcome back!")
         |> redirect(to: ~p"/")
 
       {:error, _reason} ->
         conn
-        |> put_flash(:error, "Invalid username or password")
-        |> render(:new)
+        |> put_flash(:error, "Invalid email or password")
+        |> redirect(to: "/sessions/new")
     end
   end
 
   def delete(conn, _params) do
     conn
     |> Auth.logout()
-    |> put_flash(:info, "You have been logged out")
-    |> redirect(to: ~p"/")
+    |> put_flash(:info, "Logged out successfully.")
+    |> redirect(to: "/")
   end
 end

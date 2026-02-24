@@ -78,6 +78,11 @@ defmodule Rumbl.Accounts do
   def authenticate_by_username_and_pass(username, given_pass) do
     user = get_user_by(username: username)
 
+    # Log exactly what is being compared
+    IO.puts("--- AUTH DEBUG ---")
+    IO.puts("Username: [#{username}]")
+    IO.puts("Pass Length: #{String.length(given_pass)}")
+
     cond do
       user && Bcrypt.verify_pass(given_pass, user.password_hash) ->
         {:ok, user}
@@ -86,7 +91,6 @@ defmodule Rumbl.Accounts do
         {:error, :unauthorized}
 
       true ->
-        # Prevent timing attacks
         Bcrypt.no_user_verify()
         {:error, :not_found}
     end

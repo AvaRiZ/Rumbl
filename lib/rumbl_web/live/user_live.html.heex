@@ -13,23 +13,91 @@
         </:action>
       </.table>
 
-    <% :show -> %>
+    <% action when action in [:show, :edit] -> %>
       <% user = assigns[:user] %>
       <%= if user do %>
+        <%!-- Manual Modal Overlay: Only shows when @live_action is :edit --%>
+        <%= if @live_action == :edit do %>
+          <div class="fixed inset-0 bg-zinc-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div class="bg-white p-8 rounded-2xl shadow-xl max-w-lg w-full border border-zinc-200">
+              <.header>
+                Edit Profile
+                <:subtitle>Update your display name and username.</:subtitle>
+              </.header>
+
+              <.simple_form for={@form} phx-submit="save_profile">
+                <.input field={@form[:name]} label="Full Name" />
+                <.input field={@form[:username]} label="Username" />
+
+                <:actions>
+                  <.button class="w-full">Save Changes</.button>
+                </:actions>
+              </.simple_form>
+
+              <div class="mt-4 flex justify-center">
+                <.link patch={~p"/users/#{user}"} class="text-sm font-semibold text-zinc-600 hover:text-zinc-900">
+                  Cancel and go back
+                </.link>
+              </div>
+            </div>
+          </div>
+        <% end %>
+
+        <%!-- Profile Display Content --%>
         <.header>
           {user.name}
           <:subtitle>@{user.username}</:subtitle>
+
+          <:actions>
+            <%= if @current_user && @current_user.id == user.id do %>
+              <.link patch={~p"/users/#{user}/show/edit"} phx-click={JS.push_focus()}>
+                <.button>Edit Profile</.button>
+              </.link>
+            <% end %>
+          </:actions>
         </.header>
 
-        <.list>
-          <:item title="Name">{user.name}</:item>
-          <:item title="Username">@{user.username}</:item>
-          <:item title="Member since">{Calendar.strftime(user.inserted_at, "%B %d, %Y")}</:item>
-        </.list>
+        <div class="mt-8 bg-base-200/50 p-6 rounded-xl border border-base-300">
+          <.list>
+            <:item title="Name">{user.name}</:item>
+            <:item title="Username">
+              <span class="badge badge-outline">@{user.username}</span>
+            </:item>
+            <:item title="Member since">
+              {Calendar.strftime(user.inserted_at, "%B %d, %Y")}
+            </:item>
+            <:item :if={@current_user && @current_user.id == user.id} title="Account Status">
+              <span class="text-green-600 flex items-center gap-1">
+                <.icon name="hero-check-badge-solid" class="w-4 h-4" /> Verified Owner
+              </span>
+            </:item>
+          </.list>
+        </div>
 
-        <.back navigate={~p"/users"}>Back to users</.back>
+        <div class="mt-12">
+          <h3 class="text-base font-semibold leading-7 text-base-content">
+            <%= if @current_user && @current_user.id == user.id, do: "My Videos", else: "#{user.name}'s Videos" %>
+          </h3>
+          <div class="mt-4 border-t border-base-200">
+            <p class="py-4 text-sm text-base-content/60 italic">No videos uploaded yet.</p>
+          </div>
+        </div>
+
+        <div class="mt-10 flex items-center justify-between">
+          <.back navigate={~p"/users"}>Back to users</.back>
+
+          <%= if @current_user && @current_user.id == user.id do %>
+            <.link href={~p"/sessions"} method="delete" class="text-sm font-semibold text-red-600 hover:text-red-500">
+              Sign out
+            </.link>
+          <% end %>
+        </div>
+
       <% else %>
-        <p class="text-sm text-base-content/70">User is loading...</p>
+        <div class="flex flex-col items-center justify-center py-20">
+          <.icon name="hero-arrow-path" class="h-8 w-8 text-brand animate-spin" />
+          <p class="mt-4 text-sm text-base-content/70 italic">Finding user details...</p>
+        </div>
       <% end %>
 
     <% :new -> %>

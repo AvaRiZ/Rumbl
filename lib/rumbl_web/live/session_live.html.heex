@@ -1,0 +1,30 @@
+<Layouts.app flash={@flash} current_user={@current_user}>
+  <.header>
+    Log In
+    <:subtitle>Welcome back to Rumbl!</:subtitle>
+  </.header>
+
+  <.simple_form
+    for={@form}
+    id="session-form"
+    action={~p"/sessions"}
+    phx-submit="save"
+    phx-trigger-action={@trigger_submit}
+  >
+    <.input field={@form[:username]} type="text" label="Username" required />
+    <.input field={@form[:password]} type="password" label="Password" required />
+
+    <p :if={@error_message} id="session-error" class="text-sm text-red-600">{@error_message}</p>
+
+    <div>
+      <.button id="log-in-button">Log In</.button>
+    </div>
+  </.simple_form>
+
+  <p class="mt-4 text-sm text-base-content/70">
+    Don't have an account?
+    <.link navigate={~p"/users/new"} class="font-semibold text-brand hover:underline">
+      Register
+    </.link>
+  </p>
+</Layouts.app>

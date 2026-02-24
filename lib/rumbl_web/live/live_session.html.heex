@@ -1,0 +1,27 @@
+<Layouts.app flash={@flash} current_user={@current_user}>
+  <.header>
+    Log In
+    <:subtitle>Welcome back to Rumbl!</:subtitle>
+  </.header>
+
+  <.form
+    for={assigns[:form] || to_form(%{}, as: :session)}
+    id="session-form"
+    phx-submit="save"
+    class="space-y-4"
+  >
+    <.input field={(assigns[:form] || to_form(%{}, as: :session))[:username]} type="text" label="Username" required />
+    <.input field={(assigns[:form] || to_form(%{}, as: :session))[:password]} type="password" label="Password" required />
+
+    <div>
+      <.button id="log-in-button">Log In</.button>
+    </div>
+  </.form>
+
+  <p class="mt-4 text-sm text-base-content/70">
+    Don't have an account?
+    <.link navigate={~p"/users/new"} class="font-semibold text-brand hover:underline">
+      Register
+    </.link>
+  </p>
+</Layouts.app>

@@ -1,6 +1,6 @@
 <.header>
   Edit Video
-  <:subtitle><%= @video.title %></:subtitle>
+  <:subtitle>{@video.title}</:subtitle>
 </.header>
 
 <.simple_form :let={f} for={@changeset} action={~p"/videos/#{@video}"}>
@@ -11,7 +11,13 @@
   <.input field={f[:title]} type="text" label="Title" required />
   <.input field={f[:url]} type="text" label="YouTube URL" required />
   <.input field={f[:description]} type="textarea" label="Description" />
-  <.input field={f[:category_id]} type="select" label="Category" options={@categories} prompt="Choose a category" />
+  <.input
+    field={f[:category_id]}
+    type="select"
+    label="Category"
+    options={@categories}
+    prompt="Choose a category"
+  />
 
   <:actions>
     <.button>Save Changes</.button>
@@ -20,7 +26,11 @@
 
 <div class="mt-8 flex gap-4">
   <.back navigate={~p"/videos/#{@video}"}>Back to video</.back>
-  <.link href={~p"/videos/#{@video}"} method="delete" data-confirm="Are you sure you want to delete this video?">
+  <.link
+    href={~p"/videos/#{@video}"}
+    method="delete"
+    data-confirm="Are you sure you want to delete this video?"
+  >
     <.button class="bg-red-600 hover:bg-red-700">Delete Video</.button>
   </.link>
 </div>

@@ -18,14 +18,25 @@ alias Rumbl.Multimedia.Category
 IO.puts("Seeding database...")
 
 # Create Categories
-categories = ["Action", "Drama", "Comedy", "Romance", "Sci-Fi", "Documentary", "Educational", "Music"]
+categories = [
+  "Action",
+  "Drama",
+  "Comedy",
+  "Romance",
+  "Sci-Fi",
+  "Documentary",
+  "Educational",
+  "Music"
+]
 
 IO.puts("Creating categories...")
+
 for name <- categories do
   case Repo.get_by(Category, name: name) do
     nil ->
       Repo.insert!(%Category{name: name})
       IO.puts("  Created category: #{name}")
+
     _ ->
       IO.puts("  Category already exists: #{name}")
   end
@@ -33,22 +44,28 @@ end
 
 # Create Demo User
 IO.puts("\nCreating demo user...")
-demo_user = case Accounts.get_user_by(username: "demo") do
-  nil ->
-    {:ok, user} = Accounts.register_user(%{
-      name: "Demo User",
-      username: "demo",
-      password: "demo123456"
-    })
-    IO.puts("  Created user: demo (password: demo123456)")
-    user
-  user ->
-    IO.puts("  Demo user already exists")
-    user
-end
+
+demo_user =
+  case Accounts.get_user_by(username: "demo") do
+    nil ->
+      {:ok, user} =
+        Accounts.register_user(%{
+          name: "Demo User",
+          username: "demo",
+          password: "demo123456"
+        })
+
+      IO.puts("  Created user: demo (password: demo123456)")
+      user
+
+    user ->
+      IO.puts("  Demo user already exists")
+      user
+  end
 
 # Create some demo videos
 IO.puts("\nCreating demo videos...")
+
 demo_videos = [
   %{
     title: "Elixir in 100 Seconds",
@@ -85,6 +102,7 @@ for video_attrs <- demo_videos do
     nil ->
       {:ok, _video} = Multimedia.create_video(demo_user, attrs)
       IO.puts("  Created video: #{video_attrs.title}")
+
     _ ->
       IO.puts("  Video already exists: #{video_attrs.title}")
   end

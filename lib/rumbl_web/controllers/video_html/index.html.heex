@@ -8,12 +8,12 @@
 </.header>
 
 <.table id="videos" rows={@videos}>
-  <:col :let={video} label="Title"><%= video.title %></:col>
+  <:col :let={video} label="Title">{video.title}</:col>
   <:col :let={video} label="Category">
-    <%= if video.category, do: video.category.name, else: "-" %>
+    {if video.category, do: video.category.name, else: "-"}
   </:col>
   <:col :let={video} label="Added">
-    <%= Calendar.strftime(video.inserted_at, "%b %d, %Y") %>
+    {Calendar.strftime(video.inserted_at, "%b %d, %Y")}
   </:col>
   <:action :let={video}>
     <.link navigate={~p"/watch/#{video}"}>Watch</.link>
@@ -29,6 +29,8 @@
 <%= if Enum.empty?(@videos) do %>
   <p class="mt-8 text-center text-gray-500">
     You haven't added any videos yet.
-    <.link navigate={~p"/videos/new"} class="text-brand hover:underline">Add your first video</.link>
+    <.link navigate={~p"/videos/new"} class="text-brand hover:underline">
+      Add your first video
+    </.link>
   </p>
 <% end %>

@@ -1,17 +1,21 @@
 <div class="max-w-4xl mx-auto">
   <.header>
-    <%= @video.title %>
+    {@video.title}
     <:subtitle>
-      Added by <%= @video.user.name %>
+      Added by {@video.user.name}
       <%= if @video.category do %>
-        in <%= @video.category.name %>
+        in {@video.category.name}
       <% end %>
     </:subtitle>
   </.header>
 
   <div class="mt-6">
-    <%# Video Player %>
-    <div id="video-container" data-id={@video.id} data-player-id="video-player" class="aspect-video bg-black rounded-lg overflow-hidden">
+    <div
+      id="video-container"
+      data-id={@video.id}
+      data-player-id="video-player"
+      class="aspect-video bg-black rounded-lg overflow-hidden"
+    >
       <%= if youtube_id(@video) do %>
         <iframe
           id="video-player"
@@ -20,7 +24,8 @@
           src={"https://www.youtube.com/embed/#{youtube_id(@video)}?enablejsapi=1"}
           frameborder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowfullscreen>
+          allowfullscreen
+        >
         </iframe>
       <% else %>
         <div class="flex items-center justify-center h-full text-white">
@@ -29,19 +34,16 @@
       <% end %>
     </div>
 
-    <%# Description %>
     <%= if @video.description do %>
       <div class="mt-4 p-4 bg-gray-50 rounded-lg">
         <h3 class="font-semibold text-gray-700">Description</h3>
-        <p class="mt-2 text-gray-600"><%= @video.description %></p>
+        <p class="mt-2 text-gray-600">{@video.description}</p>
       </div>
     <% end %>
 
-    <%# Annotations Section %>
     <div class="mt-8">
       <h3 class="text-lg font-semibold text-gray-800">Annotations</h3>
 
-      <%# Add annotation form %>
       <%= if @current_user do %>
         <form id="annotation-form" class="mt-4 flex gap-2">
           <input
@@ -66,17 +68,16 @@
         </p>
       <% end %>
 
-      <%# Annotations list %>
       <div id="annotations" class="mt-6 space-y-3">
         <%= for annotation <- @annotations do %>
           <div class="annotation p-3 bg-gray-50 rounded-lg" data-at={annotation.at}>
             <div class="flex items-center gap-2">
               <span class="text-xs font-mono text-brand bg-brand/10 px-2 py-1 rounded">
-                <%= format_time(annotation.at) %>
+                {format_time(annotation.at)}
               </span>
-              <span class="font-semibold text-gray-800"><%= annotation.user.username %></span>
+              <span class="font-semibold text-gray-800">{annotation.user.username}</span>
             </div>
-            <p class="mt-1 text-gray-600"><%= annotation.body %></p>
+            <p class="mt-1 text-gray-600">{annotation.body}</p>
           </div>
         <% end %>
       </div>
@@ -94,7 +95,6 @@
   </div>
 </div>
 
-<%# User token for WebSocket authentication %>
 <script>
   window.userToken = "<%= @user_token %>";
   window.videoId = <%= @video.id %>;

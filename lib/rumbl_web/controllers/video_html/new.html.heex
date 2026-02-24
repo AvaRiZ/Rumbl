@@ -9,9 +9,21 @@
   </.error>
 
   <.input field={f[:title]} type="text" label="Title" required />
-  <.input field={f[:url]} type="text" label="YouTube URL" placeholder="https://www.youtube.com/watch?v=..." required />
+  <.input
+    field={f[:url]}
+    type="text"
+    label="YouTube URL"
+    placeholder="https://www.youtube.com/watch?v=..."
+    required
+  />
   <.input field={f[:description]} type="textarea" label="Description" />
-  <.input field={f[:category_id]} type="select" label="Category" options={@categories} prompt="Choose a category" />
+  <.input
+    field={f[:category_id]}
+    type="select"
+    label="Category"
+    options={@categories}
+    prompt="Choose a category"
+  />
 
   <:actions>
     <.button>Save Video</.button>

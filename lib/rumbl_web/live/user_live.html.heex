@@ -1,0 +1,58 @@
+<Layouts.app flash={@flash} current_user={@current_user}>
+  <%= case @live_action do %>
+    <% :index -> %>
+      <.header>
+        All Users
+      </.header>
+
+      <.table id="users" rows={assigns[:users] || []}>
+        <:col :let={user} label="Name">{user.name}</:col>
+        <:col :let={user} label="Username">@{user.username}</:col>
+        <:action :let={user}>
+          <.link navigate={~p"/users/#{user}"}>View</.link>
+        </:action>
+      </.table>
+
+    <% :show -> %>
+      <% user = assigns[:user] %>
+      <%= if user do %>
+        <.header>
+          {user.name}
+          <:subtitle>@{user.username}</:subtitle>
+        </.header>
+
+        <.list>
+          <:item title="Name">{user.name}</:item>
+          <:item title="Username">@{user.username}</:item>
+          <:item title="Member since">{Calendar.strftime(user.inserted_at, "%B %d, %Y")}</:item>
+        </.list>
+
+        <.back navigate={~p"/users"}>Back to users</.back>
+      <% else %>
+        <p class="text-sm text-base-content/70">User is loading...</p>
+      <% end %>
+
+    <% :new -> %>
+      <.header>
+        Create Account
+        <:subtitle>Join Rumbl and start sharing videos!</:subtitle>
+      </.header>
+
+      <.form for={assigns[:form] || to_form(%{}, as: :user)} id="user-form" phx-submit="save" class="space-y-4">
+        <.input field={(assigns[:form] || to_form(%{}, as: :user))[:name]} type="text" label="Name" required />
+        <.input field={(assigns[:form] || to_form(%{}, as: :user))[:username]} type="text" label="Username" required />
+        <.input field={(assigns[:form] || to_form(%{}, as: :user))[:password]} type="password" label="Password" required />
+
+        <div>
+          <.button id="create-account-button">Create Account</.button>
+        </div>
+      </.form>
+
+      <p class="mt-4 text-sm text-base-content/70">
+        Already have an account?
+        <.link navigate={~p"/sessions/new"} class="font-semibold text-brand hover:underline">
+          Log in
+        </.link>
+      </p>
+  <% end %>
+</Layouts.app>

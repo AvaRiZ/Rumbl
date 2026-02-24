@@ -1,9 +1,9 @@
 <.header>
-  <%= @video.title %>
+  {@video.title}
   <:subtitle>
-    Added by <%= @video.user.name %>
+    Added by {@video.user.name}
     <%= if @video.category do %>
-      in <%= @video.category.name %>
+      in {@video.category.name}
     <% end %>
   </:subtitle>
   <:actions>
@@ -14,14 +14,14 @@
 </.header>
 
 <.list>
-  <:item title="Title"><%= @video.title %></:item>
+  <:item title="Title">{@video.title}</:item>
   <:item title="URL">
     <a href={@video.url} target="_blank" class="text-brand hover:underline">
-      <%= @video.url %>
+      {@video.url}
     </a>
   </:item>
-  <:item title="Description"><%= @video.description || "No description" %></:item>
-  <:item title="Category"><%= if @video.category, do: @video.category.name, else: "None" %></:item>
+  <:item title="Description">{@video.description || "No description"}</:item>
+  <:item title="Category">{if @video.category, do: @video.category.name, else: "None"}</:item>
 </.list>
 
 <div class="mt-8 flex gap-4">

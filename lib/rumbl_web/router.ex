@@ -18,20 +18,28 @@ defmodule RumblWeb.Router do
   scope "/", RumblWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    live "/", PageLive, :home
 
-    # User routes
-    resources "/users", UserController, only: [:index, :show, :new, :create]
+    live_session :public, on_mount: [{RumblWeb.LiveUserAuth, :mount_current_user}] do
+      live "/users", UserLive, :index
+      live "/users/new", UserLive, :new
+      live "/users/:id", UserLive, :show
 
-    # Session routes
-    resources "/sessions", SessionController, only: [:new, :create]
-    delete "/sessions", SessionController, :delete
+      live "/sessions/new", SessionLive, :new
 
-    # Video routes
-    resources "/videos", VideoController
+      live "/videos/:id", VideoLive, :show
+      live "/watch/:id", VideoLive, :watch
+    end
 
-    # Watch video (public)
-    get "/watch/:id", VideoController, :watch
+    live_session :authenticated,
+      on_mount: [
+        {RumblWeb.LiveUserAuth, :mount_current_user},
+        {RumblWeb.LiveUserAuth, :ensure_authenticated}
+      ] do
+      live "/videos", VideoLive, :index
+      live "/videos/new", VideoLive, :new
+      live "/videos/:id/edit", VideoLive, :edit
+    end
   end
 
   # Other scopes may use custom stacks.

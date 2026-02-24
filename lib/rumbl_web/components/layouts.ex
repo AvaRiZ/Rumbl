@@ -49,7 +49,7 @@ defmodule RumblWeb.Layouts do
               <a href="/videos" class="btn btn-ghost">My Videos</a>
             </li>
             <li>
-              <span class="text-sm">Hello, <strong><%= @current_user.name %></strong></span>
+              <span class="text-sm">Hello, <strong>{@current_user.name}</strong></span>
             </li>
             <li>
               <a href={"/users/#{@current_user.id}"} class="btn btn-ghost btn-sm">Profile</a>

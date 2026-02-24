@@ -7,7 +7,8 @@ defmodule Rumbl.Multimedia.Annotation do
 
   schema "annotations" do
     field :body, :string
-    field :at, :integer  # Time in milliseconds
+    # Time in milliseconds
+    field :at, :integer
 
     belongs_to :user, User
     belongs_to :video, Video

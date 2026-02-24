@@ -328,7 +328,9 @@ defmodule RumblWeb.CoreComponents do
   attr :for, :any, required: true, doc: "the data structure for the form"
   attr :as, :any, default: nil, doc: "the server side parameter to collect all input under"
   attr :action, :string, default: nil, doc: "the action to submit the form to"
-  attr :rest, :global, include: ~w(autocomplete name rel enctype method novalidate target multipart)
+
+  attr :rest, :global,
+    include: ~w(autocomplete name rel enctype method novalidate target multipart)
 
   slot :inner_block, required: true
   slot :actions, doc: "the slot for form actions, such as a submit button"
@@ -358,7 +360,10 @@ defmodule RumblWeb.CoreComponents do
 
   def back(assigns) do
     ~H"""
-    <.link navigate={@navigate} class="text-sm font-semibold text-brand hover:underline flex items-center gap-1">
+    <.link
+      navigate={@navigate}
+      class="text-sm font-semibold text-brand hover:underline flex items-center gap-1"
+    >
       <.icon name="hero-arrow-left" class="size-4" />
       {render_slot(@inner_block)}
     </.link>

@@ -36,6 +36,7 @@ defmodule Rumbl.Multimedia.Video do
       case URI.parse(url) do
         %URI{scheme: scheme, host: host} when scheme in ["http", "https"] and not is_nil(host) ->
           []
+
         _ ->
           [{field, "must be a valid URL"}]
       end

@@ -41,6 +41,15 @@ defmodule Rumbl.Multimedia do
   end
 
   @doc """
+  Gets a single video by id.
+  """
+  def get_video_by_id!(id) when is_integer(id) do
+    Video
+    |> Repo.get!(id)
+    |> Repo.preload([:user, :category])
+  end
+
+  @doc """
   Gets a user's video by slug.
   """
   def get_user_video!(%User{} = user, slug) when is_binary(slug) do

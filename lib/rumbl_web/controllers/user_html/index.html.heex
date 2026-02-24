@@ -3,8 +3,8 @@
 </.header>
 
 <.table id="users" rows={@users}>
-  <:col :let={user} label="Name"><%= user.name %></:col>
-  <:col :let={user} label="Username">@<%= user.username %></:col>
+  <:col :let={user} label="Name">{user.name}</:col>
+  <:col :let={user} label="Username">@{user.username}</:col>
   <:action :let={user}>
     <.link navigate={~p"/users/#{user}"}>View</.link>
   </:action>

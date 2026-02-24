@@ -1,0 +1,247 @@
+<Layouts.app flash={@flash} current_user={@current_user}>
+  <%= case @live_action do %>
+    <% :index -> %>
+      <.header>
+        My Videos
+        <:actions>
+          <.link navigate={~p"/videos/new"}>
+            <.button id="add-video-button">Add Video</.button>
+          </.link>
+        </:actions>
+      </.header>
+
+      <.table id="videos" rows={@videos}>
+        <:col :let={video} label="Title">{video.title}</:col>
+        <:col :let={video} label="Category">
+          {if(video.category, do: video.category.name, else: "-")}
+        </:col>
+        <:col :let={video} label="Added">
+          {Calendar.strftime(video.inserted_at, "%b %d, %Y")}
+        </:col>
+        <:action :let={video}>
+          <.link navigate={~p"/watch/#{video}"}>Watch</.link>
+        </:action>
+        <:action :let={video}>
+          <.link navigate={~p"/videos/#{video}"}>View</.link>
+        </:action>
+        <:action :let={video}>
+          <.link navigate={~p"/videos/#{video}/edit"}>Edit</.link>
+        </:action>
+        <:action :let={video}>
+          <.link phx-click="delete" phx-value-id={video.slug} data-confirm="Delete this video?">
+            Delete
+          </.link>
+        </:action>
+      </.table>
+
+      <%= if Enum.empty?(@videos) do %>
+        <p class="mt-8 text-center text-gray-500">
+          You haven't added any videos yet.
+          <.link navigate={~p"/videos/new"} class="text-brand hover:underline">
+            Add your first video
+          </.link>
+        </p>
+      <% end %>
+    <% :new -> %>
+      <.header>
+        Add New Video
+        <:subtitle>Share a YouTube video with the community</:subtitle>
+      </.header>
+
+      <.form for={@form} id="video-form" phx-submit="save" class="space-y-4">
+        <.input field={@form[:title]} type="text" label="Title" required />
+        <.input
+          field={@form[:url]}
+          type="text"
+          label="YouTube URL"
+          placeholder="https://www.youtube.com/watch?v=..."
+          required
+        />
+        <.input field={@form[:description]} type="textarea" label="Description" />
+        <.input
+          field={@form[:category_id]}
+          type="select"
+          label="Category"
+          options={@categories}
+          prompt="Choose a category"
+        />
+
+        <div>
+          <.button id="save-video-button">Save Video</.button>
+        </div>
+      </.form>
+
+      <.back navigate={~p"/videos"}>Back to videos</.back>
+    <% :edit -> %>
+      <.header>
+        Edit Video
+        <:subtitle>{@video.title}</:subtitle>
+      </.header>
+
+      <.form for={@form} id="video-form" phx-submit="save" class="space-y-4">
+        <.input field={@form[:title]} type="text" label="Title" required />
+        <.input field={@form[:url]} type="text" label="YouTube URL" required />
+        <.input field={@form[:description]} type="textarea" label="Description" />
+        <.input
+          field={@form[:category_id]}
+          type="select"
+          label="Category"
+          options={@categories}
+          prompt="Choose a category"
+        />
+
+        <div>
+          <.button id="save-video-button">Save Changes</.button>
+        </div>
+      </.form>
+
+      <div class="mt-8 flex gap-4">
+        <.back navigate={~p"/videos/#{@video}"}>Back to video</.back>
+      </div>
+    <% :show -> %>
+      <.header>
+        {@video.title}
+        <:subtitle>
+          Added by {@video.user.name}
+          <%= if @video.category do %>
+            in {@video.category.name}
+          <% end %>
+        </:subtitle>
+        <:actions>
+          <.link navigate={~p"/watch/#{@video}"}>
+            <.button id="watch-video-button">Watch Video</.button>
+          </.link>
+        </:actions>
+      </.header>
+
+      <.list>
+        <:item title="Title">{@video.title}</:item>
+        <:item title="URL">
+          <a
+            href={@video.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-brand hover:underline"
+          >
+            {@video.url}
+          </a>
+        </:item>
+        <:item title="Description">{@video.description || "No description"}</:item>
+        <:item title="Category">
+          {if(@video.category, do: @video.category.name, else: "None")}
+        </:item>
+      </.list>
+
+      <div class="mt-8 flex gap-4">
+        <.back navigate={~p"/videos"}>Back to videos</.back>
+      </div>
+    <% :watch -> %>
+      <div class="max-w-4xl mx-auto" id="video-watch-root">
+        <.header>
+          {@video.title}
+          <:subtitle>
+            Added by {@video.user.name}
+            <%= if @video.category do %>
+              in {@video.category.name}
+            <% end %>
+          </:subtitle>
+        </.header>
+
+        <div
+          class="mt-6"
+          id="video-watch-hook"
+          phx-hook="VideoWatch"
+          phx-update="ignore"
+          data-id={@video.id}
+          data-user-token={@user_token || ""}
+        >
+          <div
+            id="video-container"
+            data-id={@video.id}
+            data-player-id="video-player"
+            class="aspect-video bg-black rounded-lg overflow-hidden"
+          >
+            <%= if youtube_id(@video) do %>
+              <iframe
+                id="video-player"
+                width="100%"
+                height="100%"
+                src={"https://www.youtube.com/embed/#{youtube_id(@video)}?enablejsapi=1"}
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen
+              >
+              </iframe>
+            <% else %>
+              <div class="flex items-center justify-center h-full text-white">
+                <p>Unable to load video. Invalid YouTube URL.</p>
+              </div>
+            <% end %>
+          </div>
+
+          <%= if @video.description do %>
+            <div class="mt-4 p-4 bg-gray-50 rounded-lg">
+              <h3 class="font-semibold text-gray-700">Description</h3>
+              <p class="mt-2 text-gray-600">{@video.description}</p>
+            </div>
+          <% end %>
+
+          <div class="mt-8">
+            <h3 class="text-lg font-semibold text-gray-800">Annotations</h3>
+
+            <%= if @current_user do %>
+              <form id="annotation-form" class="mt-4 flex gap-2">
+                <.input
+                  id="annotation-body"
+                  name="body"
+                  type="text"
+                  value=""
+                  label=""
+                  placeholder="Add a comment at current time..."
+                />
+                <input type="hidden" id="annotation-at" name="at" value="0" />
+                <button
+                  id="annotation-submit"
+                  type="submit"
+                  class="px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand/90 transition-colors"
+                >
+                  Post
+                </button>
+              </form>
+            <% else %>
+              <p class="mt-4 text-gray-500">
+                <.link navigate={~p"/sessions/new"} class="text-brand hover:underline">
+                  Log in
+                </.link>
+                to add annotations.
+              </p>
+            <% end %>
+
+            <div id="annotations" class="mt-6 space-y-3">
+              <%= for annotation <- @annotations do %>
+                <div class="annotation p-3 bg-gray-50 rounded-lg" data-at={annotation.at}>
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs font-mono text-brand bg-brand/10 px-2 py-1 rounded">
+                      {format_time(annotation.at)}
+                    </span>
+                    <span class="font-semibold text-gray-800">{annotation.user.username}</span>
+                  </div>
+                  <p class="mt-1 text-gray-600">{annotation.body}</p>
+                </div>
+              <% end %>
+            </div>
+
+            <%= if Enum.empty?(@annotations) do %>
+              <p id="no-annotations" class="mt-4 text-center text-gray-500">
+                No annotations yet. Be the first to comment!
+              </p>
+            <% end %>
+          </div>
+        </div>
+
+        <div class="mt-8">
+          <.back navigate={~p"/videos"}>Back to videos</.back>
+        </div>
+      </div>
+  <% end %>
+</Layouts.app>

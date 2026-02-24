@@ -38,7 +38,9 @@ defmodule Rumbl.Accounts.User do
     |> put_password_hash()
   end
 
-  defp put_password_hash(%Ecto.Changeset{valid?: true, changes: %{password: password}} = changeset) do
+  defp put_password_hash(
+         %Ecto.Changeset{valid?: true, changes: %{password: password}} = changeset
+       ) do
     put_change(changeset, :password_hash, Bcrypt.hash_pwd_salt(password))
   end
 

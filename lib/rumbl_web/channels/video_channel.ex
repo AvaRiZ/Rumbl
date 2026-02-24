@@ -6,7 +6,7 @@ defmodule RumblWeb.VideoChannel do
   @impl true
   def join("video:" <> video_id, _params, socket) do
     video_id = String.to_integer(video_id)
-    video = Multimedia.get_video!(video_id)
+    video = Multimedia.get_video_by_id!(video_id)
 
     annotations =
       video

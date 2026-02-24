@@ -25,11 +25,115 @@ import {LiveSocket} from "phoenix_live_view"
 import {hooks as colocatedHooks} from "phoenix-colocated/rumbl"
 import topbar from "../vendor/topbar"
 
+const VideoWatch = {
+  mounted() {
+    const token = this.el.dataset.userToken
+    const videoId = this.el.dataset.id
+
+    if (!token || !videoId) {
+      return
+    }
+
+    this.videoSocket = new Socket("/socket", {params: {token}})
+    this.videoSocket.connect()
+
+    this.channel = this.videoSocket.channel(`video:${videoId}`, {})
+    this.channel.on("new_annotation", annotation => this.renderAnnotation(annotation))
+    this.channel
+      .join()
+      .receive("error", reason => console.error("Video channel join failed", reason))
+
+    this.form = this.el.querySelector("#annotation-form")
+    if (this.form) {
+      this.handleSubmit = event => {
+        event.preventDefault()
+
+        const bodyEl = this.el.querySelector("#annotation-body")
+        const atEl = this.el.querySelector("#annotation-at")
+        const body = (bodyEl?.value || "").trim()
+        const at = parseInt(atEl?.value || "0", 10) || 0
+
+        if (!body) {
+          return
+        }
+
+        this.channel
+          .push("new_annotation", {body, at})
+          .receive("ok", () => {
+            if (bodyEl) {
+              bodyEl.value = ""
+            }
+          })
+          .receive("error", error => console.error("Failed to post annotation", error))
+      }
+
+      this.form.addEventListener("submit", this.handleSubmit)
+    }
+  },
+
+  destroyed() {
+    if (this.form && this.handleSubmit) {
+      this.form.removeEventListener("submit", this.handleSubmit)
+    }
+
+    if (this.channel) {
+      this.channel.leave()
+    }
+
+    if (this.videoSocket) {
+      this.videoSocket.disconnect()
+    }
+  },
+
+  renderAnnotation(annotation) {
+    const container = this.el.querySelector("#annotations")
+    if (!container) {
+      return
+    }
+
+    const noAnnotations = this.el.querySelector("#no-annotations")
+    if (noAnnotations) {
+      noAnnotations.remove()
+    }
+
+    const wrapper = document.createElement("div")
+    wrapper.className = "annotation p-3 bg-gray-50 rounded-lg"
+    wrapper.dataset.at = annotation.at
+
+    const meta = document.createElement("div")
+    meta.className = "flex items-center gap-2"
+
+    const time = document.createElement("span")
+    time.className = "text-xs font-mono text-brand bg-brand/10 px-2 py-1 rounded"
+    time.textContent = this.formatTime(annotation.at)
+
+    const user = document.createElement("span")
+    user.className = "font-semibold text-gray-800"
+    user.textContent = annotation.user.username
+
+    const body = document.createElement("p")
+    body.className = "mt-1 text-gray-600"
+    body.textContent = annotation.body
+
+    meta.append(time, user)
+    wrapper.append(meta, body)
+    container.appendChild(wrapper)
+    wrapper.scrollIntoView({behavior: "smooth", block: "nearest"})
+  },
+
+  formatTime(ms) {
+    const totalSeconds = Math.floor(ms / 1000)
+    const minutes = Math.floor(totalSeconds / 60)
+    const seconds = totalSeconds % 60
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`
+  }
+}
+
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   params: {_csrf_token: csrfToken},
-  hooks: {...colocatedHooks},
+  hooks: {VideoWatch, ...colocatedHooks},
 })
 
 // Show progress bar on live navigation and form submits
@@ -80,86 +184,3 @@ if (process.env.NODE_ENV === "development") {
     window.liveReloader = reloader
   })
 }
-
-// Video Channel for Real-time Annotations
-const Video = {
-  init(socket, element) {
-    if (!element) return;
-
-    const videoId = element.dataset.id;
-    const channel = socket.channel(`video:${videoId}`, {});
-
-    channel.on("new_annotation", (resp) => {
-      this.renderAnnotation(resp);
-    });
-
-    channel
-      .join()
-      .receive("ok", (resp) => {
-        console.log("Joined video channel", resp);
-      })
-      .receive("error", (reason) => {
-        console.error("Join failed", reason);
-      });
-
-    // Handle annotation form
-    const form = document.getElementById("annotation-form");
-    if (form) {
-      form.addEventListener("submit", (e) => {
-        e.preventDefault();
-        const body = document.getElementById("annotation-body").value;
-        const at = parseInt(document.getElementById("annotation-at").value) || 0;
-
-        if (body.trim()) {
-          channel.push("new_annotation", { body, at })
-            .receive("ok", () => {
-              document.getElementById("annotation-body").value = "";
-            })
-            .receive("error", (e) => {
-              console.error("Failed to post annotation", e);
-            });
-        }
-      });
-    }
-  },
-
-  renderAnnotation(annotation) {
-    const container = document.getElementById("annotations");
-    const noAnnotations = document.getElementById("no-annotations");
-
-    if (noAnnotations) {
-      noAnnotations.remove();
-    }
-
-    const div = document.createElement("div");
-    div.className = "annotation p-3 bg-gray-50 rounded-lg";
-    div.dataset.at = annotation.at;
-    div.innerHTML = `
-      <div class="flex items-center gap-2">
-        <span class="text-xs font-mono text-brand bg-brand/10 px-2 py-1 rounded">
-          ${this.formatTime(annotation.at)}
-        </span>
-        <span class="font-semibold text-gray-800">${annotation.user.username}</span>
-      </div>
-      <p class="mt-1 text-gray-600">${annotation.body}</p>
-    `;
-    container.appendChild(div);
-    div.scrollIntoView({ behavior: "smooth" });
-  },
-
-  formatTime(ms) {
-    const totalSeconds = Math.floor(ms / 1000);
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-  }
-};
-
-// Initialize video channel if on watch page
-const videoContainer = document.getElementById("video-container");
-if (videoContainer && window.userToken) {
-  const videoSocket = new Socket("/socket", { params: { token: window.userToken } });
-  videoSocket.connect();
-  Video.init(videoSocket, videoContainer);
-}
-

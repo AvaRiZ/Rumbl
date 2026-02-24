@@ -1,0 +1,61 @@
+<Layouts.app flash={@flash} current_user={@current_user}>
+  <section class="relative overflow-hidden rounded-3xl border border-base-300 bg-gradient-to-br from-base-100 via-base-100 to-base-200 px-6 py-16 sm:px-10">
+    <div class="absolute -top-16 -right-16 h-48 w-48 rounded-full bg-brand/10 blur-3xl"></div>
+    <div class="absolute -bottom-20 -left-20 h-56 w-56 rounded-full bg-sky-500/10 blur-3xl"></div>
+
+    <div class="relative mx-auto max-w-4xl text-center">
+      <p class="inline-flex items-center rounded-full border border-base-300 bg-base-100 px-4 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-base-content/70">
+        Live Reactions for Video Moments
+      </p>
+
+      <h1 class="mt-6 text-balance text-4xl font-black leading-tight sm:text-6xl">
+        Watch together, react in real time, and keep every moment searchable.
+      </h1>
+
+      <p class="mx-auto mt-5 max-w-2xl text-lg text-base-content/70 sm:text-xl">
+        Rumbl turns passive watching into shared conversation with timestamped annotations and realtime updates.
+      </p>
+
+      <div class="mt-10 flex flex-wrap items-center justify-center gap-3">
+        <%= if @current_user do %>
+          <.link navigate={~p"/videos"} class="btn btn-primary btn-lg" id="home-my-videos">
+            My Videos
+          </.link>
+          <.link navigate={~p"/videos/new"} class="btn btn-outline btn-lg" id="home-add-video">
+            Add Video
+          </.link>
+        <% else %>
+          <.link navigate={~p"/users/new"} class="btn btn-primary btn-lg" id="home-get-started">
+            Create Account
+          </.link>
+          <.link navigate={~p"/sessions/new"} class="btn btn-outline btn-lg" id="home-log-in">
+            Log In
+          </.link>
+        <% end %>
+      </div>
+    </div>
+  </section>
+
+  <section class="mt-10 grid grid-cols-1 gap-4 md:grid-cols-3">
+    <article class="rounded-2xl border border-base-300 bg-base-100 p-6 transition hover:-translate-y-0.5 hover:shadow-lg">
+      <h2 class="text-lg font-bold">Curated Video Library</h2>
+      <p class="mt-2 text-sm leading-relaxed text-base-content/70">
+        Organize your clips by category and keep your best references easy to revisit.
+      </p>
+    </article>
+
+    <article class="rounded-2xl border border-base-300 bg-base-100 p-6 transition hover:-translate-y-0.5 hover:shadow-lg">
+      <h2 class="text-lg font-bold">Timestamped Notes</h2>
+      <p class="mt-2 text-sm leading-relaxed text-base-content/70">
+        Comment on exact moments so feedback stays precise and useful for everyone.
+      </p>
+    </article>
+
+    <article class="rounded-2xl border border-base-300 bg-base-100 p-6 transition hover:-translate-y-0.5 hover:shadow-lg">
+      <h2 class="text-lg font-bold">Realtime Collaboration</h2>
+      <p class="mt-2 text-sm leading-relaxed text-base-content/70">
+        See new annotations instantly and keep discussion flowing while the video plays.
+      </p>
+    </article>
+  </section>
+</Layouts.app>

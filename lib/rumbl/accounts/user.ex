@@ -32,8 +32,9 @@ defmodule Rumbl.Accounts.User do
   def registration_changeset(user, attrs) do
     user
     |> changeset(attrs)
-    |> cast(attrs, [:password])
-    |> validate_required([:password])
+    |> cast(attrs, [:name, :username, :password])
+    |> validate_required([:name, :username, :password])
+    |> validate_length(:username, min: 3, max: 20)
     |> validate_length(:password, min: 6, max: 100)
     |> put_password_hash()
   end
@@ -45,4 +46,10 @@ defmodule Rumbl.Accounts.User do
   end
 
   defp put_password_hash(changeset), do: changeset
+
+  def register_user(user, attrs) do
+    user
+    |> registration_changeset(attrs)
+    |> Rumbl.Repo.insert()
+  end
 end

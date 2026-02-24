@@ -20,17 +20,6 @@ defmodule RumblWeb.Router do
 
     live "/", PageLive, :home
 
-    live_session :public, on_mount: [{RumblWeb.LiveUserAuth, :mount_current_user}] do
-      live "/users", UserLive, :index
-      live "/users/new", UserLive, :new
-      live "/users/:id", UserLive, :show
-
-      live "/sessions/new", SessionLive, :new
-
-      live "/videos/:id", VideoLive, :show
-      live "/watch/:id", VideoLive, :watch
-    end
-
     live_session :authenticated,
       on_mount: [
         {RumblWeb.LiveUserAuth, :mount_current_user},
@@ -39,6 +28,21 @@ defmodule RumblWeb.Router do
       live "/videos", VideoLive, :index
       live "/videos/new", VideoLive, :new
       live "/videos/:id/edit", VideoLive, :edit
+
+      live "/users/:id/show/edit", UserLive, :edit
+    end
+
+    live_session :public, on_mount: [{RumblWeb.LiveUserAuth, :mount_current_user}] do
+      live "/users", UserLive, :index
+      live "/users/new", UserLive, :new
+      live "/users/:id", UserLive, :show
+
+      live "/sessions/new", SessionLive, :new
+      delete "/sessions", SessionController, :delete
+      post "/sessions", SessionController, :create
+
+      live "/videos/:id", VideoLive, :show
+      live "/watch/:id", VideoLive, :watch
     end
   end
 

@@ -36,7 +36,7 @@ defmodule RumblWeb.Layouts do
 
   def app(assigns) do
     ~H"""
-    <header class="navbar px-4 sm:px-6 lg:px-8 border-b border-base-300">
+    <header class="navbar">
       <div class="flex-1">
         <a href="/" class="flex-1 flex w-fit items-center gap-2">
           <span class="text-xl font-bold text-brand">Rumbl</span>
@@ -46,23 +46,49 @@ defmodule RumblWeb.Layouts do
         <ul class="flex flex-column px-1 space-x-4 items-center">
           <%= if @current_user do %>
             <li>
-              <a href="/videos" class="btn btn-ghost">My Videos</a>
+              <a
+                href="/videos"
+                class="btn btn-ghost"
+              >
+                My Videos
+              </a>
             </li>
             <li>
               <span class="text-sm">Hello, <strong>{@current_user.name}</strong></span>
             </li>
             <li>
-              <a href={"/users/#{@current_user.id}"} class="btn btn-ghost btn-sm">Profile</a>
+              <a
+                href={"/users/#{@current_user.id}"}
+                class="btn btn-ghost"
+              >
+                Profile
+              </a>
             </li>
             <li>
-              <.link href="/sessions" method="delete" class="btn btn-ghost btn-sm">Log out</.link>
+              <.link
+                href="/sessions"
+                method="delete"
+                class="btn btn-ghost"
+              >
+                Log out
+              </.link>
             </li>
           <% else %>
             <li>
-              <a href="/sessions/new" class="btn btn-ghost">Log in</a>
+              <a
+                href="/sessions/new"
+                class="btn btn-ghost"
+              >
+                Log in
+              </a>
             </li>
             <li>
-              <a href="/users/new" class="btn btn-primary">Register</a>
+              <a
+                href="/users/new"
+                class="btn btn-ghost"
+              >
+                Register
+              </a>
             </li>
           <% end %>
           <li>

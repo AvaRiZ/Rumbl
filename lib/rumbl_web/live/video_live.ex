@@ -4,6 +4,11 @@ defmodule RumblWeb.VideoLive do
   alias Rumbl.Multimedia
   alias Rumbl.Multimedia.Video
 
+  embed_templates "video_live/*"
+
+  @impl true
+  def render(assigns), do: video_live(assigns)
+
   @impl true
   def mount(_params, _session, socket) do
     {:ok,

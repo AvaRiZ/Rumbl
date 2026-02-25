@@ -4,7 +4,12 @@ defmodule RumblWeb.UserLive do
   alias Rumbl.Multimedia
   alias Phoenix.LiveView.JS
 
+  embed_templates "user_live/*"
+
   on_mount {RumblWeb.LiveUserAuth, :mount_current_user}
+
+  @impl true
+  def render(assigns), do: user_live(assigns)
 
   @impl true
   def mount(_params, _session, socket) do

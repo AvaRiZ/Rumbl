@@ -2,7 +2,12 @@ defmodule RumblWeb.SessionLive do
   use RumblWeb, :live_view
   alias Rumbl.Accounts
 
+  embed_templates "session_live/*"
+
   on_mount {RumblWeb.LiveUserAuth, :mount_current_user}
+
+  @impl true
+  def render(assigns), do: session_live(assigns)
 
   @impl true
   @spec mount(any(), any(), map()) :: {:ok, map()}

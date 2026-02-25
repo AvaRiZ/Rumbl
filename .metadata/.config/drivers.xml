@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<drivers>
+	<provider id="postgresql">
+		<driver id="postgres-jdbc" categories="sql" name="PostgreSQL" class="org.postgresql.Driver" url="jdbc:postgresql://{host}[:{port}]/[{database}]" port="5432" defaultDatabase="postgres" defaultUser="postgres" description="PostgreSQL standard driver" custom="false">
+			<library type="jar" path="maven:/org.postgresql:postgresql:RELEASE" custom="false" version="42.7.2">
+				<file id="org.postgresql:postgresql:RELEASE" version="42.7.2" path="${drivers_home}/maven/maven-central/org.postgresql/postgresql-42.7.2.jar" crc="58053067"/>
+				<file id="org.checkerframework:checker-qual:3.42.0" version="3.42.0" path="${drivers_home}/maven/maven-central/org.checkerframework/checker-qual-3.42.0.jar" crc="95d3fcb9"/>
+			</library>
+			<library type="jar" path="maven:/net.postgis:postgis-jdbc:RELEASE" custom="false" version="2.5.0" ignore-dependencies="true">
+				<file id="net.postgis:postgis-jdbc:RELEASE" version="2.5.0" path="${drivers_home}/maven/maven-central/net.postgis/postgis-jdbc-2.5.0.jar" crc="5b9fcd22"/>
+			</library>
+			<library type="jar" path="maven:/net.postgis:postgis-geometry:RELEASE" custom="false" version="2.5.0" ignore-dependencies="true">
+				<file id="net.postgis:postgis-geometry:RELEASE" version="2.5.0" path="${drivers_home}/maven/maven-central/net.postgis/postgis-geometry-2.5.0.jar" crc="1bff06b6"/>
+			</library>
+			<library type="jar" path="maven:/com.github.waffle:waffle-jna:RELEASE" custom="false" version="3.5.1">
+				<file id="com.github.waffle:waffle-jna:RELEASE" version="3.5.1" path="${drivers_home}/maven/maven-central/com.github.waffle/waffle-jna-3.5.1.jar" crc="dd82070a"/>
+				<file id="net.java.dev.jna:jna:5.16.0" version="5.16.0" path="${drivers_home}/maven/maven-central/net.java.dev.jna/jna-5.16.0.jar" crc="13cf3a68"/>
+				<file id="net.java.dev.jna:jna-platform:5.16.0" version="5.16.0" path="${drivers_home}/maven/maven-central/net.java.dev.jna/jna-platform-5.16.0.jar" crc="9d3cb008"/>
+				<file id="org.slf4j:jcl-over-slf4j:2.0.16" version="2.0.16" path="${drivers_home}/maven/maven-central/org.slf4j/jcl-over-slf4j-2.0.16.jar" crc="cbce2835"/>
+				<file id="org.slf4j:slf4j-api:2.0.16" version="2.0.16" path="${drivers_home}/maven/maven-central/org.slf4j/slf4j-api-2.0.16.jar" crc="330926e2"/>
+				<file id="com.github.ben-manes.caffeine:caffeine:3.1.8" version="3.1.8" path="${drivers_home}/maven/maven-central/com.github.ben-manes.caffeine/caffeine-3.1.8.jar" crc="aef1cb4b"/>
+				<file id="org.checkerframework:checker-qual:3.37.0" version="3.37.0" path="${drivers_home}/maven/maven-central/org.checkerframework/checker-qual-3.37.0.jar" crc="cf825034"/>
+				<file id="com.google.errorprone:error_prone_annotations:2.21.1" version="2.21.1" path="${drivers_home}/maven/maven-central/com.google.errorprone/error_prone_annotations-2.21.1.jar" crc="e8977a70"/>
+				<file id="org.checkerframework:checker-qual:3.48.3" version="3.48.3" path="${drivers_home}/maven/maven-central/org.checkerframework/checker-qual-3.48.3.jar" crc="4041fe72"/>
+				<file id="net.bytebuddy:byte-buddy:1.15.11" version="1.15.11" path="${drivers_home}/maven/maven-central/net.bytebuddy/byte-buddy-1.15.11.jar" crc="ba31bab2"/>
+				<file id="net.bytebuddy:byte-buddy-agent:1.15.11" version="1.15.11" path="${drivers_home}/maven/maven-central/net.bytebuddy/byte-buddy-agent-1.15.11.jar" crc="3f7e90f"/>
+			</library>
+			<library type="license" path="licenses/external/pg.txt" custom="false"/>
+		</driver>
+	</provider>
+</drivers>

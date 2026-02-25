@@ -1,5 +1,102 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <items>
+	<item id="NodeList/DBSEntityAssociation/PostgreTableForeignKey/PostgreTableForeignKeyColumn">
+		<column name="Name" visible="true" order="0" width="218"/>
+		<column name="Attribute" visible="true" order="1" width="100"/>
+		<column name="Owner" visible="true" order="2" width="100"/>
+		<column name="Type" visible="true" order="3" width="100"/>
+		<column name="Referenced Column" visible="true" order="4" width="127"/>
+		<column name="Associated Entity" visible="true" order="5" width="112"/>
+		<column name="Match Type" visible="true" order="6" width="100"/>
+		<column name="Delete Rule" visible="true" order="7" width="100"/>
+		<column name="Update Rule" visible="true" order="8" width="100"/>
+		<column name="Comment" visible="true" order="9" width="100"/>
+	</item>
+	<item id="NodeList/PostgreDependency">
+		<column name="Name" visible="true" order="0" width="198"/>
+		<column name="Type" visible="true" order="1" width="100"/>
+		<column name="Table" visible="true" order="2" width="100"/>
+		<column name="Schema" visible="true" order="3" width="100"/>
+		<column name="Object" visible="true" order="4" width="311"/>
+	</item>
+	<item id="NodeList/PostgreIndex/PostgreIndexColumn">
+		<column name="Column" visible="true" order="0" width="113"/>
+		<column name="Index Name" visible="true" order="1" width="180"/>
+		<column name="Table" visible="true" order="2" width="100"/>
+		<column name="Ascending" visible="true" order="3" width="100"/>
+		<column name="Nullable" visible="true" order="4" width="100"/>
+		<column name="Unique" visible="true" order="5" width="100"/>
+		<column name="Operator Class" visible="true" order="6" width="100"/>
+		<column name="Predicate" visible="true" order="7" width="100"/>
+		<column name="Rel Size" visible="true" order="8" width="100"/>
+		<column name="Access Method" visible="true" order="9" width="100"/>
+		<column name="Tablespace" visible="true" order="10" width="100"/>
+		<column name="Comment" visible="true" order="11" width="100"/>
+	</item>
+	<item id="NodeList/PostgreSchema">
+		<column name="Name" visible="true" order="0" width="100"/>
+		<column name="Comment" visible="true" order="1" width="1090"/>
+	</item>
+	<item id="NodeList/PostgreTableBase">
+		<column name="Table Name" visible="true" order="0" width="100"/>
+		<column name="Object ID" visible="true" order="1" width="100"/>
+		<column name="Owner" visible="true" order="2" width="100"/>
+		<column name="Extra Options" visible="true" order="3" width="100"/>
+		<column name="Comment" visible="true" order="4" width="100"/>
+	</item>
+	<item id="NodeList/PostgreTableColumn">
+		<column name="Column Name" visible="true" order="0" width="122"/>
+		<column name="#" visible="true" order="1" width="100"/>
+		<column name="Data type" visible="true" order="2" width="100"/>
+		<column name="Identity" visible="true" order="3" width="100"/>
+		<column name="Collation" visible="true" order="4" width="100"/>
+		<column name="Not Null" visible="true" order="5" width="100"/>
+		<column name="Default" visible="true" order="6" width="227"/>
+		<column name="Comment" visible="true" order="7" width="100"/>
+	</item>
+	<item id="NodeList/PostgreTableConstraint/PostgreTableConstraintColumn">
+		<column name="Name" visible="true" order="0" width="120"/>
+		<column name="Attribute" visible="true" order="1" width="100"/>
+		<column name="Owner" visible="true" order="2" width="100"/>
+		<column name="Type" visible="true" order="3" width="100"/>
+		<column name="Expression" visible="true" order="4" width="100"/>
+		<column name="Comment" visible="true" order="5" width="100"/>
+	</item>
+	<item id="NodeList/PostgreTableForeignKey">
+		<column name="Name" visible="true" order="0" width="100"/>
+		<column name="Owner" visible="true" order="1" width="100"/>
+		<column name="Type" visible="true" order="2" width="100"/>
+		<column name="Associated Entity" visible="true" order="3" width="112"/>
+		<column name="Referenced Constraint" visible="true" order="4" width="143"/>
+		<column name="Match Type" visible="true" order="5" width="100"/>
+		<column name="Delete Rule" visible="true" order="6" width="100"/>
+		<column name="Update Rule" visible="true" order="7" width="100"/>
+		<column name="Comment" visible="true" order="8" width="100"/>
+	</item>
+	<item id="NodeList/PostgreTableRegular">
+		<column name="Table Name" visible="true" order="0" width="158"/>
+		<column name="Object ID" visible="true" order="1" width="100"/>
+		<column name="Owner" visible="true" order="2" width="100"/>
+		<column name="Tablespace" visible="true" order="3" width="100"/>
+		<column name="Row Count Estimate" visible="true" order="4" width="129"/>
+		<column name="Has Row-Level Security" visible="true" order="5" width="147"/>
+		<column name="Partitions" visible="true" order="6" width="100"/>
+		<column name="Partition by" visible="true" order="7" width="100"/>
+		<column name="Extra Options" visible="true" order="8" width="100"/>
+		<column name="Comment" visible="true" order="9" width="100"/>
+	</item>
+	<item id="NodeList/PostgreTrigger">
+		<column name="Name" visible="true" order="0" width="100"/>
+		<column name="Timing" visible="true" order="1" width="100"/>
+		<column name="Manipulation" visible="true" order="2" width="100"/>
+		<column name="Type" visible="true" order="3" width="100"/>
+		<column name="Column(s)" visible="true" order="4" width="100"/>
+		<column name="Enabled" visible="true" order="5" width="100"/>
+		<column name="Object ID" visible="true" order="6" width="100"/>
+		<column name="When Expression" visible="true" order="7" width="112"/>
+		<column name="Function" visible="true" order="8" width="100"/>
+		<column name="Description" visible="true" order="9" width="100"/>
+	</item>
 	<item id="projectExplorer">
 		<column name="Name" visible="true" order="0" width="242"/>
 		<column name="DataSource" visible="true" order="1" width="164"/>

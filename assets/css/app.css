@@ -103,3 +103,37 @@
 [data-phx-session], [data-phx-teleported-src] { display: contents }
 
 /* This file is for your main application CSS */
+
+/* assets/css/app.css */
+@layer components {
+  .watch_hover {
+    /* Base Link Styles */
+    @apply inline-flex items-center gap-2 font-semibold transition-all duration-300 ease-in-out;
+    display: inline-block !important;
+    color: #FD4F00 !important;
+    position: relative;
+    padding-bottom: 2px;
+  }
+
+  .watch_hover:hover {
+    /* Color change and slight lift */
+    @apply text-orange-600;
+    transform: translateY(-1px);
+  }
+
+  /* The underline effect */
+  .watch_hover::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: 0;
+    left: 0;
+    background-color: currentColor; /* Matches the text color */
+    transition: width 0.3s ease;
+  }
+
+  .watch_hover:hover::after {
+    width: 100%;
+  }
+}

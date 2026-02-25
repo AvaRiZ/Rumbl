@@ -1,7 +1,7 @@
 defmodule RumblWeb.UserLive do
   use RumblWeb, :live_view
   alias Rumbl.Accounts
-  # Required for JS commands like push_focus [cite: 1]
+  alias Rumbl.Multimedia
   alias Phoenix.LiveView.JS
 
   on_mount {RumblWeb.LiveUserAuth, :mount_current_user}
@@ -16,11 +16,8 @@ defmodule RumblWeb.UserLive do
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   end
 
-  # --- Event Handlers (Grouped Together) ---
-
   @impl true
   def handle_event("save_profile", %{"user" => user_params}, socket) do
-    # Ensure the 'case' expression is followed immediately by its clauses
     case Accounts.update_user(socket.assigns.user, user_params) do
       {:ok, user} ->
         {:noreply,
@@ -47,28 +44,26 @@ defmodule RumblWeb.UserLive do
     end
   end
 
-  # --- Action Logic ---
-
-  # Combined logic for :show and :edit since they both need to load a user [cite: 4]
   defp apply_action(socket, action, %{"id" => id}) when action in [:show, :edit] do
     user = Accounts.get_user!(id)
+    videos = Multimedia.list_user_videos(user)
 
     socket
     |> assign(:user, user)
+    |> assign(:videos, videos)
     |> assign(:page_title, if(action == :show, do: "Show User", else: "Edit User"))
-    # Needed for the edit form [cite: 4]
     |> assign(:form, to_form(Accounts.change_user(user)))
   end
 
   defp apply_action(socket, :index, _params) do
-    (socket
-     |> assign(:page_title, "All Users")
-     |> assign(:users, Accounts.list_users()))[[cite: 4]]
+    socket
+    |> assign(:page_title, "All Users")
+    |> assign(:users, Accounts.list_users())
   end
 
   defp apply_action(socket, :new, _params) do
-    (socket
-     |> assign(:page_title, "New User")
-     |> assign(:form, to_form(Accounts.change_user(%Rumbl.Accounts.User{}))))[[cite: 4]]
+    socket
+    |> assign(:page_title, "New User")
+    |> assign(:form, to_form(Accounts.change_user(%Rumbl.Accounts.User{})))
   end
 end

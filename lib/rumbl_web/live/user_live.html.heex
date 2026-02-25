@@ -12,7 +12,6 @@
           <.link navigate={~p"/users/#{user}"}>View</.link>
         </:action>
       </.table>
-
     <% action when action in [:show, :edit] -> %>
       <% user = assigns[:user] %>
       <%= if user do %>
@@ -35,7 +34,10 @@
               </.simple_form>
 
               <div class="mt-4 flex justify-center">
-                <.link patch={~p"/users/#{user}"} class="text-sm font-semibold text-zinc-600 hover:text-zinc-900">
+                <.link
+                  patch={~p"/users/#{user}"}
+                  class="text-sm font-semibold text-zinc-600 hover:text-zinc-900"
+                >
                   Cancel and go back
                 </.link>
               </div>
@@ -76,10 +78,26 @@
 
         <div class="mt-12">
           <h3 class="text-base font-semibold leading-7 text-base-content">
-            <%= if @current_user && @current_user.id == user.id, do: "My Videos", else: "#{user.name}'s Videos" %>
+            {if @current_user && @current_user.id == user.id,
+              do: "My Videos",
+              else: "#{user.name}'s Videos"}
           </h3>
           <div class="mt-4 border-t border-base-200">
-            <p class="py-4 text-sm text-base-content/60 italic">No videos uploaded yet.</p>
+            <%= if Enum.any?(@videos) do %>
+              <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 py-4">
+                <%= for video <- @videos do %>
+                  <div class="p-4 border rounded-lg shadow-sm bg-gray">
+                    <p class="font-bold text-zinc-900">{video.title}</p>
+                    <p class="text-xs text-zinc-500">{video.url}</p>
+                    <.link navigate={~p"/videos/#{video}"} class="watch_hover">
+                      Watch Video
+                    </.link>
+                  </div>
+                <% end %>
+              </div>
+            <% else %>
+              <p class="py-4 text-sm text-base-content/60 italic">No videos uploaded yet.</p>
+            <% end %>
           </div>
         </div>
 
@@ -87,29 +105,31 @@
           <.back navigate={~p"/users"}>Back to users</.back>
 
           <%= if @current_user && @current_user.id == user.id do %>
-            <.link href={~p"/sessions"} method="delete" class="text-sm font-semibold text-red-600 hover:text-red-500">
+            <.link
+              href={~p"/sessions"}
+              method="delete"
+              class="text-sm font-semibold text-red-600 hover:text-red-500"
+            >
               Sign out
             </.link>
           <% end %>
         </div>
-
       <% else %>
         <div class="flex flex-col items-center justify-center py-20">
           <.icon name="hero-arrow-path" class="h-8 w-8 text-brand animate-spin" />
           <p class="mt-4 text-sm text-base-content/70 italic">Finding user details...</p>
         </div>
       <% end %>
-
     <% :new -> %>
       <.header>
         Create Account
         <:subtitle>Join Rumbl and start sharing videos!</:subtitle>
       </.header>
 
-      <.form for={assigns[:form] || to_form(%{}, as: :user)} id="user-form" phx-submit="save" class="space-y-4">
-        <.input field={(assigns[:form] || to_form(%{}, as: :user))[:name]} type="text" label="Name" required />
-        <.input field={(assigns[:form] || to_form(%{}, as: :user))[:username]} type="text" label="Username" required />
-        <.input field={(assigns[:form] || to_form(%{}, as: :user))[:password]} type="password" label="Password" required />
+      <.form for={@form} id="user-form" phx-submit="save" class="space-y-4">
+        <.input field={@form[:name]} type="text" label="Name" required />
+        <.input field={@form[:username]} type="text" label="Username" />
+        <.input field={@form[:password]} type="password" label="Password" />
 
         <div>
           <.button id="create-account-button">Create Account</.button>

@@ -1,5 +1,7 @@
 import Config
 
+dev_host = System.get_env("PHX_DEV_HOST") || "localhost"
+
 # Configure your database
 config :rumbl, Rumbl.Repo,
   username: "postgres",
@@ -19,7 +21,8 @@ config :rumbl, Rumbl.Repo,
 config :rumbl, RumblWeb.Endpoint,
   # Binding to loopback ipv4 address prevents access from other machines.
   # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.
-  http: [ip: {127, 0, 0, 1}],
+  url: [host: dev_host, port: 4000],
+  http: [ip: {127, 0, 0, 1}, port: 4000],
   check_origin: false,
   code_reloader: true,
   debug_errors: true,

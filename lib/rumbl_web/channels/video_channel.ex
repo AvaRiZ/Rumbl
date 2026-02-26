@@ -31,6 +31,41 @@ defmodule RumblWeb.VideoChannel do
     end
   end
 
+  def handle_in("update_annotation", %{"id" => id, "body" => body}, socket) do
+    user = Accounts.get_user!(socket.assigns.user_id)
+
+    with {annotation_id, ""} <- Integer.parse(to_string(id)) do
+      case Multimedia.update_annotation(user, annotation_id, %{"body" => body}) do
+        {:ok, annotation} ->
+          annotation = Rumbl.Repo.preload(annotation, :user)
+          broadcast!(socket, "annotation_updated", annotation_json(annotation))
+          {:reply, :ok, socket}
+
+        {:error, changeset} ->
+          {:reply, {:error, %{errors: format_errors(changeset)}}, socket}
+      end
+    else
+      _ -> {:reply, {:error, %{errors: ["Invalid annotation id"]}}, socket}
+    end
+  end
+
+  def handle_in("delete_annotation", %{"id" => id}, socket) do
+    user = Accounts.get_user!(socket.assigns.user_id)
+
+    with {annotation_id, ""} <- Integer.parse(to_string(id)) do
+      case Multimedia.delete_annotation(user, annotation_id) do
+        {:ok, _annotation} ->
+          broadcast!(socket, "annotation_deleted", %{id: annotation_id})
+          {:reply, :ok, socket}
+
+        {:error, _reason} ->
+          {:reply, {:error, %{errors: ["Unable to delete annotation"]}}, socket}
+      end
+    else
+      _ -> {:reply, {:error, %{errors: ["Invalid annotation id"]}}, socket}
+    end
+  end
+
   defp annotation_json(annotation) do
     %{
       id: annotation.id,

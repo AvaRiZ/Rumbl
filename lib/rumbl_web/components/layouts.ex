@@ -36,59 +36,86 @@ defmodule RumblWeb.Layouts do
 
   def app(assigns) do
     ~H"""
-    <header class="navbar">
-      <div class="flex-1">
-        <a href="/" class="flex-1 flex w-fit items-center gap-2">
-          <span class="text-xl font-bold text-brand">Rumbl</span>
-        </a>
-      </div>
+    <header class="navbar shadow-sm">
       <div class="flex-none">
-        <ul class="flex flex-column px-1 space-x-4 items-center">
+        <%= if @current_user do %>
+          <.link
+            navigate={~p"/watch-rooms/join"}
+            class="btn btn-square btn-ghost"
+            aria-label="Join watch room"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              class="inline-block h-5 w-5 stroke-current"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 6h16M4 12h16M4 18h16"
+              >
+              </path>
+            </svg>
+          </.link>
+        <% else %>
+          <button class="btn btn-square btn-ghost" type="button" aria-label="Open menu">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              class="inline-block h-5 w-5 stroke-current"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 6h16M4 12h16M4 18h16"
+              >
+              </path>
+            </svg>
+          </button>
+        <% end %>
+      </div>
+
+      <div class="flex-1">
+        <.link navigate={~p"/"} class="text-lg font-bold">
+          <span class="text-xl font-bold text-brand">Rumbl</span>
+        </.link>
+      </div>
+
+      <div class="flex-none">
+        <ul class="flex items-center gap-2 px-1 sm:gap-3">
           <%= if @current_user do %>
             <li>
-              <a
-                href="/videos"
-                class="btn btn-ghost"
-              >
+              <.link navigate={~p"/videos"} class="btn btn-ghost">
                 My Videos
-              </a>
+              </.link>
+            </li>
+            <li class="hidden text-sm sm:block">
+              Hello, <strong>{@current_user.name}</strong>
             </li>
             <li>
-              <span class="text-sm">Hello, <strong>{@current_user.name}</strong></span>
-            </li>
-            <li>
-              <a
-                href={"/users/#{@current_user.id}"}
-                class="btn btn-ghost"
-              >
+              <.link navigate={~p"/users/#{@current_user}"} class="btn btn-ghost">
                 Profile
-              </a>
+              </.link>
             </li>
             <li>
-              <.link
-                href="/sessions"
-                method="delete"
-                class="btn btn-ghost"
-              >
+              <.link href="/sessions" method="delete" class="btn btn-ghost">
                 Log out
               </.link>
             </li>
           <% else %>
             <li>
-              <a
-                href="/sessions/new"
-                class="btn btn-ghost"
-              >
+              <.link navigate={~p"/sessions/new"} class="btn btn-ghost">
                 Log in
-              </a>
+              </.link>
             </li>
             <li>
-              <a
-                href="/users/new"
-                class="btn btn-ghost"
-              >
+              <.link navigate={~p"/users/new"} class="btn btn-ghost">
                 Register
-              </a>
+              </.link>
             </li>
           <% end %>
           <li>

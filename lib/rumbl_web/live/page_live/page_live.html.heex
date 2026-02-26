@@ -1,61 +1,63 @@
 <Layouts.app flash={@flash} current_user={@current_user}>
-  <section class="relative overflow-hidden rounded-3xl border border-base-300 bg-gradient-to-br from-base-100 via-base-100 to-base-200 px-6 py-16 sm:px-10">
-    <div class="absolute -top-16 -right-16 h-48 w-48 rounded-full bg-brand/10 blur-3xl"></div>
-    <div class="absolute -bottom-20 -left-20 h-56 w-56 rounded-full bg-sky-500/10 blur-3xl"></div>
+  <div class="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden bg-neutral text-neutral-content">
+    <div class="absolute inset-0 bg-gradient-to-b from-black/70 via-black/35 to-black"></div>
+    <div class="absolute inset-x-0 top-0 h-80 bg-[radial-gradient(circle_at_top,#5b1331_0%,transparent_60%)] opacity-70">
+    </div>
 
-    <div class="relative mx-auto max-w-4xl text-center">
-      <p class="inline-flex items-center rounded-full border border-base-300 bg-base-100 px-4 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-base-content/70">
-        Live Reactions for Video Moments
-      </p>
-
-      <h1 class="mt-6 text-balance text-4xl font-black leading-tight sm:text-6xl">
-        Watch together, react in real time, and keep every moment searchable.
+    <section class="relative border-b border-white/10 px-6 pb-14 pt-20 sm:px-10 lg:px-16">
+      <p class="text-xs font-semibold uppercase tracking-[0.35em] text-red-300">Rumbl</p>
+      <h1 class="mt-4 max-w-3xl text-4xl font-black uppercase leading-[0.95] text-white sm:text-6xl">
+        Watch. Comment. React.
       </h1>
-
-      <p class="mx-auto mt-5 max-w-2xl text-lg text-base-content/70 sm:text-xl">
-        Rumbl turns passive watching into shared conversation with timestamped annotations and realtime updates.
+      <p class="mt-6 max-w-2xl text-base text-white/80 sm:text-lg">
+        Turn every video into a shared experience with timestamped comments and realtime discussion.
       </p>
 
-      <div class="mt-10 flex flex-wrap items-center justify-center gap-3">
+      <div class="mt-8 flex flex-wrap items-center gap-3">
         <%= if @current_user do %>
-          <.link navigate={~p"/videos"} class="btn btn-primary btn-lg" id="home-my-videos">
-            My Videos
+          <.link
+            navigate={~p"/videos"}
+            id="home-my-videos"
+            class="btn border-0 bg-white text-black hover:bg-white/90"
+          >
+            Start Watching
           </.link>
-          <.link navigate={~p"/videos/new"} class="btn btn-outline btn-lg" id="home-add-video">
-            Add Video
+          <.link
+            navigate={~p"/videos/new"}
+            id="home-add-video"
+            class="btn border-white/20 bg-white/15 text-white backdrop-blur hover:bg-white/25"
+          >
+            Add a Video
           </.link>
         <% else %>
-          <.link navigate={~p"/users/new"} class="btn btn-primary btn-lg" id="home-get-started">
-            Create Account
+          <.link
+            navigate={~p"/users/new"}
+            id="home-get-started"
+            class="btn border-0 bg-white text-black hover:bg-white/90"
+          >
+            Get Started
           </.link>
-          <.link navigate={~p"/sessions/new"} class="btn btn-outline btn-lg" id="home-log-in">
-            Log In
+          <.link
+            navigate={~p"/sessions/new"}
+            id="home-log-in"
+            class="btn border-white/20 bg-white/15 text-white backdrop-blur hover:bg-white/25"
+          >
+            Sign In
           </.link>
         <% end %>
       </div>
+    </section>
+  </div>
+
+  <section class="mx-auto mt-8 max-w-4xl rounded-2xl border border-base-300 bg-base-100 p-6">
+    <h2 class="text-lg font-bold">How Rumbl Works</h2>
+    <p class="mt-2 text-sm text-base-content/70">
+      Keep context attached to exact moments, jump into conversations instantly, and organize your video library in one place.
+    </p>
+    <div class="mt-5 flex flex-wrap gap-2 text-xs">
+      <span class="rounded-full border border-base-300 px-3 py-1">Timestamped Notes</span>
+      <span class="rounded-full border border-base-300 px-3 py-1">Realtime Feed</span>
+      <span class="rounded-full border border-base-300 px-3 py-1">Creator Profiles</span>
     </div>
-  </section>
-
-  <section class="mt-10 grid grid-cols-1 gap-4 md:grid-cols-3">
-    <article class="rounded-2xl border border-base-300 bg-base-100 p-6 transition hover:-translate-y-0.5 hover:shadow-lg">
-      <h2 class="text-lg font-bold">Curated Video Library</h2>
-      <p class="mt-2 text-sm leading-relaxed text-base-content/70">
-        Organize your clips by category and keep your best references easy to revisit.
-      </p>
-    </article>
-
-    <article class="rounded-2xl border border-base-300 bg-base-100 p-6 transition hover:-translate-y-0.5 hover:shadow-lg">
-      <h2 class="text-lg font-bold">Timestamped Notes</h2>
-      <p class="mt-2 text-sm leading-relaxed text-base-content/70">
-        Comment on exact moments so feedback stays precise and useful for everyone.
-      </p>
-    </article>
-
-    <article class="rounded-2xl border border-base-300 bg-base-100 p-6 transition hover:-translate-y-0.5 hover:shadow-lg">
-      <h2 class="text-lg font-bold">Realtime Collaboration</h2>
-      <p class="mt-2 text-sm leading-relaxed text-base-content/70">
-        See new annotations instantly and keep discussion flowing while the video plays.
-      </p>
-    </article>
   </section>
 </Layouts.app>

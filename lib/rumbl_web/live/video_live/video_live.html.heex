@@ -37,7 +37,7 @@
       <%= if Enum.empty?(@videos) do %>
         <p class="mt-8 text-center text-gray-500">
           You haven't added any videos yet.
-          <.link navigate={~p"/videos/new"} class="text-brand hover:underline">
+          <.link navigate={~p"/videos/new"} class="watch_hover">
             Add your first video
           </.link>
         </p>
@@ -114,6 +114,42 @@
         </:actions>
       </.header>
 
+      <.button id="create-room-code-button" phx-click="create_code">
+        Create Room Code
+      </.button>
+
+      <%= if @created_room_code do %>
+        <section
+          id="created-room-code-panel"
+          class="mt-4 rounded-xl border border-base-300 bg-base-100 p-4 shadow-sm"
+        >
+          <p class="text-sm text-base-content/70">Share this code:</p>
+          <p
+            id="created-room-code-value"
+            class="mt-1 font-mono text-2xl font-bold tracking-[0.3em] text-base-content"
+          >
+            {@created_room_code}
+          </p>
+          <div class="mt-3 flex flex-wrap items-center gap-2">
+            <.link
+              id="open-created-room-link"
+              navigate={~p"/watch-rooms/#{@created_room_code}"}
+              class="btn btn-sm"
+            >
+              Open Room
+            </.link>
+            <button
+              id="clear-created-room-code"
+              type="button"
+              phx-click="clear_code"
+              class="btn btn-sm btn-ghost"
+            >
+              Hide Code
+            </button>
+          </div>
+        </section>
+      <% end %>
+
       <.list>
         <:item title="Title">{@video.title}</:item>
         <:item title="URL">
@@ -121,7 +157,7 @@
             href={@video.url}
             target="_blank"
             rel="noopener noreferrer"
-            class="text-brand hover:underline"
+            class="watch_hover"
           >
             {@video.url}
           </a>
@@ -147,6 +183,16 @@
           </:subtitle>
         </.header>
 
+        <%= if @room_code do %>
+          <section
+            id="watch-room-code-banner"
+            class="mt-4 rounded-xl border border-base-300 bg-base-100 p-3 shadow-sm"
+          >
+            <p class="text-sm text-base-content/70">Watch Room Code</p>
+            <p class="font-mono text-lg font-semibold tracking-[0.2em]">{@room_code}</p>
+          </section>
+        <% end %>
+
         <div
           class="mt-6"
           id="video-watch-hook"
@@ -154,6 +200,11 @@
           phx-update="ignore"
           data-id={@video.id}
           data-user-token={@user_token || ""}
+          data-current-user-id={if(@current_user, do: @current_user.id, else: "")}
+          data-room-code={@room_code || ""}
+          data-room-host-id={@room_host_id || ""}
+          data-room-playing={to_string(@room_playing)}
+          data-room-current-ms={@room_current_ms}
         >
           <div
             id="video-container"
@@ -166,7 +217,7 @@
                 id="video-player"
                 width="100%"
                 height="100%"
-                src={"https://www.youtube.com/embed/#{youtube_id(@video)}?enablejsapi=1"}
+                src={youtube_embed_url(@video)}
                 frameborder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowfullscreen
@@ -180,37 +231,39 @@
           </div>
 
           <%= if @video.description do %>
-            <div class="mt-4 p-4 bg-gray-50 rounded-lg">
+            <div class="mt-4 p-4 bg-slate-200 rounded-lg">
               <h3 class="font-semibold text-gray-700">Description</h3>
               <p class="mt-2 text-gray-600">{@video.description}</p>
             </div>
           <% end %>
 
           <div class="mt-8">
-            <h3 class="text-lg font-semibold text-gray-800">Annotations</h3>
+            <h3 class="text-lg font-semibold text-slate-500">Annotations</h3>
 
             <%= if @current_user do %>
-              <form id="annotation-form" class="mt-4 flex gap-2">
-                <.input
-                  id="annotation-body"
-                  name="body"
-                  type="text"
-                  value=""
-                  label=""
-                  placeholder="Add a comment at current time..."
-                />
-                <input type="hidden" id="annotation-at" name="at" value="0" />
-                <button
-                  id="annotation-submit"
-                  type="submit"
-                  class="px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand/90 transition-colors"
-                >
-                  Post
-                </button>
+              <form id="annotation-form" class="mt-4">
+                <div class="flex items-stretch gap-0 [&_.fieldset]:m-0 [&_.fieldset]:p-0 [&_.fieldset]:flex-1 [&_.fieldset>label]:m-0 [&_.fieldset>label]:block [&_.fieldset>label]:h-12">
+                  <.input
+                    id="annotation-body"
+                    name="body"
+                    type="text"
+                    value=""
+                    placeholder="Add a comment at the current time"
+                    class="w-full input h-full rounded-r-none"
+                  />
+                  <input type="hidden" id="annotation-at" name="at" value="0" />
+                  <button
+                    id="annotation-submit"
+                    type="submit"
+                    class="btn self-end h-12 min-h-12 rounded-l-none"
+                  >
+                    Post
+                  </button>
+                </div>
               </form>
             <% else %>
               <p class="mt-4 text-gray-500">
-                <.link navigate={~p"/sessions/new"} class="text-brand hover:underline">
+                <.link navigate={~p"/sessions/new"} class="watch_hover">
                   Log in
                 </.link>
                 to add annotations.
@@ -219,14 +272,55 @@
 
             <div id="annotations" class="mt-6 space-y-3">
               <%= for annotation <- @annotations do %>
-                <div class="annotation p-3 bg-gray-50 rounded-lg" data-at={annotation.at}>
-                  <div class="flex items-center gap-2">
-                    <span class="text-xs font-mono text-brand bg-brand/10 px-2 py-1 rounded">
-                      {format_time(annotation.at)}
-                    </span>
-                    <span class="font-semibold text-gray-800">{annotation.user.username}</span>
+                <div
+                  id={"annotation-#{annotation.id}"}
+                  class="annotation p-3 bg-slate-200 rounded-lg shadow-sm"
+                  data-id={annotation.id}
+                  data-at={annotation.at}
+                >
+                  <div class="flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-2">
+                      <span class="text-xs font-mono text-slate-600 px-2 py-1 rounded">
+                        {format_time(annotation.at)}
+                      </span>
+                      <span class="font-semibold text-slate-600">{annotation.user.username}</span>
+                    </div>
+                    <%= if @current_user && annotation.user.id == @current_user.id do %>
+                      <div class="relative">
+                        <button
+                          type="button"
+                          class="btn btn-ghost btn-xs btn-square"
+                          data-menu-toggle
+                          data-id={annotation.id}
+                          aria-label="Annotation actions"
+                        >
+                          <.icon name="hero-ellipsis-horizontal" class="size-4" />
+                        </button>
+                        <div
+                          id={"annotation-menu-#{annotation.id}"}
+                          class="hidden absolute right-0 top-7 z-10 w-28 overflow-hidden rounded-md border border-base-300 bg-base-100 shadow-lg"
+                        >
+                          <button
+                            type="button"
+                            class="block w-full px-3 py-2 text-left text-sm hover:bg-base-200"
+                            data-action="edit"
+                            data-id={annotation.id}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            class="block w-full px-3 py-2 text-left text-sm text-error hover:bg-base-200"
+                            data-action="delete"
+                            data-id={annotation.id}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    <% end %>
                   </div>
-                  <p class="mt-1 text-gray-600">{annotation.body}</p>
+                  <p class="annotation-body mt-1 text-gray-600">{annotation.body}</p>
                 </div>
               <% end %>
             </div>

@@ -83,7 +83,7 @@
 		<column name="Partitions" visible="true" order="6" width="100"/>
 		<column name="Partition by" visible="true" order="7" width="100"/>
 		<column name="Extra Options" visible="true" order="8" width="100"/>
-		<column name="Comment" visible="true" order="9" width="100"/>
+		<column name="Comment" visible="true" order="9" width="110"/>
 	</item>
 	<item id="NodeList/PostgreTrigger">
 		<column name="Name" visible="true" order="0" width="100"/>

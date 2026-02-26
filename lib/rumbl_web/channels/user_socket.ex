@@ -2,6 +2,7 @@ defmodule RumblWeb.UserSocket do
   use Phoenix.Socket
 
   channel "video:*", RumblWeb.VideoChannel
+  channel "watch_room:*", RumblWeb.WatchRoomChannel
 
   @impl true
   def connect(%{"token" => token}, socket, _connect_info) do

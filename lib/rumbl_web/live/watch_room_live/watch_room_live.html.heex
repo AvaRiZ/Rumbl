@@ -1,0 +1,30 @@
+<Layouts.app flash={@flash} current_user={@current_user}>
+  <%= if @live_action == :join do %>
+    <section class="mx-auto max-w-xl rounded-2xl border border-base-300 bg-base-100 p-6 shadow-sm">
+      <h1 class="text-2xl font-bold">Join a Watch Room</h1>
+      <p class="mt-2 text-sm text-base-content/70">
+        Enter the room code shared by the host to join live playback.
+      </p>
+
+      <.form
+        for={@room_form}
+        id="watch-room-join-form"
+        phx-submit="join_room"
+        class="mt-6 space-y-4"
+      >
+        <.input
+          field={@room_form[:code]}
+          type="text"
+          label="Room Code"
+          placeholder="Example: A1B2C3D4"
+          class="w-full input uppercase tracking-widest"
+        />
+        <.button id="watch-room-join-submit">Join Room</.button>
+      </.form>
+    </section>
+  <% else %>
+    <section class="mx-auto max-w-xl rounded-2xl border border-base-300 bg-base-100 p-6 shadow-sm">
+      <p class="text-sm text-base-content/70">Redirecting to room video...</p>
+    </section>
+  <% end %>
+</Layouts.app>

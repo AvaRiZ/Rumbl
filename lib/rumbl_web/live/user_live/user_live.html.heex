@@ -18,7 +18,7 @@
         <%!-- Manual Modal Overlay: Only shows when @live_action is :edit --%>
         <%= if @live_action == :edit do %>
           <div class="fixed inset-0 bg-zinc-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div class="bg-white p-8 rounded-2xl shadow-xl max-w-lg w-full border border-zinc-200">
+            <div class="bg-slate-600 p-8 rounded-2xl shadow-xl max-w-lg w-full border border-zinc-200">
               <.header>
                 Edit Profile
                 <:subtitle>Update your display name and username.</:subtitle>
@@ -29,14 +29,14 @@
                 <.input field={@form[:username]} label="Username" />
 
                 <:actions>
-                  <.button class="w-full">Save Changes</.button>
+                  <.button class="btn bg-transparent/60 w-full text-white hover:shadow-md hover:text-[#F4DF00]">Save Changes</.button>
                 </:actions>
               </.simple_form>
 
               <div class="mt-4 flex justify-center">
                 <.link
-                  patch={~p"/users/#{user}"}
-                  class="text-sm font-semibold text-zinc-600 hover:text-zinc-900"
+                  href={~p"/users/#{user}"}
+                  class="btn bg-transparent/60 w-full text-sm font-semibold text-white hover:shadow-md hover:text-[#F4DF00]"
                 >
                   Cancel and go back
                 </.link>
@@ -68,38 +68,44 @@
             <:item title="Member since">
               {Calendar.strftime(user.inserted_at, "%B %d, %Y")}
             </:item>
-            <:item :if={@current_user && @current_user.id == user.id} title="Account Status">
-              <span class="text-green-600 flex items-center gap-1">
-                <.icon name="hero-check-badge-solid" class="w-4 h-4" /> Verified Owner
-              </span>
-            </:item>
           </.list>
         </div>
 
-        <div class="mt-12">
-          <h3 class="text-base font-semibold leading-7 text-base-content">
-            {if @current_user && @current_user.id == user.id,
-              do: "My Videos",
-              else: "#{user.name}'s Videos"}
-          </h3>
-          <div class="mt-4 border-t border-base-200">
+        <section class="mt-12 rounded-2xl border border-base-300 bg-base-200/70 p-6 shadow-sm">
+          <div class="rounded-2xl border border-base-300 bg-base-100/80 p-6 shadow-sm">
+            <div class="flex items-center justify-between gap-4">
+              <h3 class="text-2xl font-bold leading-tight text-base-content">
+                {if @current_user && @current_user.id == user.id,
+                  do: "My Videos",
+                  else: "#{user.name}'s Videos"}
+              </h3>
+              <span class="badge badge-outline">{length(@videos)} videos</span>
+            </div>
+            <p class="mt-2 text-base text-base-content/70">
+              {if @current_user && @current_user.id == user.id,
+                do: "Manage and revisit your uploads in one place.",
+                else: "Browse uploaded videos and jump straight to playback."}
+            </p>
+          </div>
+
+          <div class="mt-6 border-t border-base-300/60 pt-5">
             <%= if Enum.any?(@videos) do %>
-              <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 py-4">
+              <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <%= for video <- @videos do %>
-                  <div class="p-4 border rounded-lg shadow-sm bg-gray">
-                    <p class="font-bold text-zinc-900">{video.title}</p>
-                    <p class="text-xs text-zinc-500">{video.url}</p>
-                    <.link navigate={~p"/videos/#{video}"} class="watch_hover">
+                  <article class="rounded-xl border border-base-300/80 bg-base-100 p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+                    <p class="line-clamp-2 font-bold text-base-content">{video.title}</p>
+                    <p class="mt-1 line-clamp-2 text-xs text-base-content/70">{video.url}</p>
+                    <.link navigate={~p"/videos/#{video}"} class="mt-3 inline-flex items-center text-sm font-semibold watch_hover">
                       Watch Video
                     </.link>
-                  </div>
+                  </article>
                 <% end %>
               </div>
             <% else %>
-              <p class="py-4 text-sm text-base-content/60 italic">No videos uploaded yet.</p>
+              <p class="py-6 text-sm text-base-content/60 italic">No videos uploaded yet.</p>
             <% end %>
           </div>
-        </div>
+        </section>
 
         <div class="mt-10 flex items-center justify-between">
           <.back navigate={~p"/users"}>Back to users</.back>

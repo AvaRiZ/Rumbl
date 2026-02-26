@@ -36,48 +36,95 @@ defmodule RumblWeb.Layouts do
 
   def app(assigns) do
     ~H"""
-    <header class="navbar shadow-sm">
-      <div class="flex-none">
-        <%= if @current_user do %>
-          <.link
-            navigate={~p"/watch-rooms/join"}
-            class="btn btn-square btn-ghost"
-            aria-label="Join watch room"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              class="inline-block h-5 w-5 stroke-current"
+    <div
+      id="sidebar-backdrop"
+      class="fixed inset-0 z-[80] hidden bg-black/60"
+      phx-click={
+        JS.hide(to: "#sidebar-backdrop")
+        |> JS.add_class("-translate-x-full", to: "#app-sidebar")
+      }
+    >
+    </div>
+
+    <aside
+      id="app-sidebar"
+      class="fixed inset-y-0 left-0 z-[90] w-64 -translate-x-full border-r border-base-300 bg-base-100 text-base-content shadow-2xl transition-transform duration-300 ease-in-out"
+    >
+      <%= if @current_user do %>
+        <div class="flex h-full flex-col p-4">
+          <div class="mb-4 flex items-center justify-between">
+            <h2 class="text-lg font-semibold">Menu</h2>
+            <button
+              class="btn btn-sm btn-ghost"
+              phx-click={
+                JS.hide(to: "#sidebar-backdrop")
+                |> JS.add_class("-translate-x-full", to: "#app-sidebar")
+              }
             >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M4 6h16M4 12h16M4 18h16"
-              >
-              </path>
-            </svg>
-          </.link>
-        <% else %>
-          <button class="btn btn-square btn-ghost" type="button" aria-label="Open menu">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              class="inline-block h-5 w-5 stroke-current"
+              <.icon name="hero-x-mark" class="h-5 w-5" />
+            </button>
+          </div>
+          <nav class="space-y-2">
+            <.link
+              navigate={~p"/watch-rooms/join"}
+              class="block rounded-lg px-3 py-2 hover:bg-base-200"
             >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M4 6h16M4 12h16M4 18h16"
-              >
-              </path>
-            </svg>
-          </button>
-        <% end %>
-      </div>
+              Join Watch Room
+            </.link>
+            <.link
+              navigate={~p"/videos"}
+              class="block rounded-lg px-3 py-2 hover:bg-base-200"
+            >
+              Create Watch Room
+            </.link>
+          </nav>
+        </div>
+      <% else %>
+        <div class="flex h-full flex-col p-4">
+          <div class="mb-4 flex items-center justify-between">
+            <h2 class="text-lg font-semibold">Menu</h2>
+            <button
+              class="btn btn-sm btn-ghost"
+              phx-click={
+                JS.hide(to: "#sidebar-backdrop")
+                |> JS.add_class("-translate-x-full", to: "#app-sidebar")
+              }
+            >
+              <.icon name="hero-x-mark" class="h-5 w-5" />
+            </button>
+          </div>
+          <p class="mb-3 text-sm text-base-content/70">
+            Log in first before joining or creating a watch room.
+          </p>
+          <nav class="space-y-2">
+            <.link
+              navigate={~p"/sessions/new"}
+              class="block rounded-lg px-3 py-2 hover:bg-base-200"
+            >
+              Log in
+            </.link>
+            <.link
+              navigate={~p"/users/new"}
+              class="block rounded-lg px-3 py-2 hover:bg-base-200"
+            >
+              No account yet?
+            </.link>
+          </nav>
+        </div>
+      <% end %>
+    </aside>
+    <header class="navbar border-b border-base-300 bg-base-100">
+      <button
+        id="sidebar-toggle"
+        class="btn btn-square btn-ghost"
+        phx-click={
+          JS.show(to: "#sidebar-backdrop")
+          |> JS.remove_class("-translate-x-full", to: "#app-sidebar")
+        }
+        aria-label="Toggle menu"
+      >
+        <.icon name="hero-bars-3" class="h-5 w-5" />
+      </button>
 
       <div class="flex-1">
         <.link navigate={~p"/"} class="text-lg font-bold">
@@ -96,31 +143,68 @@ defmodule RumblWeb.Layouts do
             <li class="hidden text-sm sm:block">
               Hello, <strong>{@current_user.name}</strong>
             </li>
-            <li>
-              <.link navigate={~p"/users/#{@current_user}"} class="btn btn-ghost">
-                Profile
-              </.link>
-            </li>
-            <li>
-              <.link href="/sessions" method="delete" class="btn btn-ghost">
-                Log out
-              </.link>
+            <li class="relative">
+              <button
+                id="user-menu-toggle"
+                class="link"
+                phx-click={JS.toggle(to: "#user-menu-dropdown")}
+                aria-label="User actions"
+              >
+                <.icon name="hero-ellipsis-horizontal" class="h-5 w-5" />
+              </button>
+              <div
+                id="user-menu-dropdown"
+                class="absolute right-0 top-full z-[95] mt-2 hidden min-w-56 overflow-hidden rounded-lg border border-base-300 bg-base-100 shadow-xl"
+                phx-click-away={JS.hide(to: "#user-menu-dropdown")}
+              >
+                <.link
+                  href={~p"/users/#{@current_user}"}
+                  class="block px-3 py-2 text-sm hover:bg-base-200"
+                >
+                  Profile
+                </.link>
+                <div class="flex items-center w-full p-2 hover:bg-base-200 rounded mb-1.5">
+                  <span class="inline-flex items-center text-sm">
+                    <.icon name="hero-moon" class="w-4 h-4 me-1.5" /> Dark mode
+                  </span>
+                  <label class="inline-flex items-center cursor-pointer ms-auto">
+                    <input
+                      id="dark-mode-switch"
+                      type="checkbox"
+                      class="sr-only peer"
+                      phx-hook="ThemeSwitch"
+                    />
+                    <div class="relative w-9 h-5 bg-base-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-base-content/30 rounded-full peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-base-100 after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-base-content" />
+                    <span class="ms-3 text-sm font-medium sr-only">Toggle dark mode</span>
+                  </label>
+                </div>
+                <.link
+                  href="/sessions"
+                  method="delete"
+                  class="block px-3 py-2 text-sm hover:bg-base-200"
+                >
+                  Log out
+                </.link>
+              </div>
             </li>
           <% else %>
             <li>
-              <.link navigate={~p"/sessions/new"} class="btn btn-ghost">
+              <.link
+                navigate={~p"/sessions/new"}
+                class="btn bg-[#FF9900] text-black hover:bg-[#FF9900]/80 btn-ghost "
+              >
                 Log in
               </.link>
             </li>
             <li>
-              <.link navigate={~p"/users/new"} class="btn btn-ghost">
+              <.link
+                navigate={~p"/users/new"}
+                class="btn bg-[#FF9900] text-black hover:bg-[#FF9900]/80 btn-ghost"
+              >
                 Register
               </.link>
             </li>
           <% end %>
-          <li>
-            <.theme_toggle />
-          </li>
         </ul>
       </div>
     </header>

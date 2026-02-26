@@ -12,6 +12,8 @@ defmodule Rumbl.Application do
       Rumbl.Repo,
       {DNSCluster, query: Application.get_env(:rumbl, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Rumbl.PubSub},
+      RumblWeb.Presence,
+      Rumbl.WatchAlong.CleanupWorker,
       # Start a worker by calling: Rumbl.Worker.start_link(arg)
       # {Rumbl.Worker, arg},
       # Start to serve requests, typically the last entry

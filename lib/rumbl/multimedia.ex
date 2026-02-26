@@ -160,7 +160,16 @@ defmodule Rumbl.Multimedia do
   @doc """
   Deletes an annotation.
   """
-  def delete_annotation(%Annotation{} = annotation) do
+  def delete_annotation(%User{id: user_id}, annotation_id) do
+    annotation = Repo.get_by!(Annotation, id: annotation_id, user_id: user_id)
     Repo.delete(annotation)
+  end
+
+  def update_annotation(%User{id: user_id}, annotation_id, attrs) do
+    annotation = Repo.get_by!(Annotation, id: annotation_id, user_id: user_id)
+
+    annotation
+    |> Annotation.changeset(attrs)
+    |> Repo.update()
   end
 end

@@ -30,6 +30,8 @@ defmodule RumblWeb.Router do
       live "/videos/:id/edit", VideoLive, :edit
 
       live "/users/:id/show/edit", UserLive, :edit
+      live "/watch-rooms/join", WatchRoomLive, :join
+      live "/watch-rooms/:code", WatchRoomLive, :show
     end
 
     live_session :public, on_mount: [{RumblWeb.LiveUserAuth, :mount_current_user}] do

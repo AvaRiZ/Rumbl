@@ -1,47 +1,62 @@
 <Layouts.app flash={@flash} current_user={@current_user}>
   <%= case @live_action do %>
     <% :index -> %>
-      <.header>
-        My Videos
-        <:actions>
-          <.link navigate={~p"/videos/new"}>
-            <.button id="add-video-button">Add Video</.button>
-          </.link>
-        </:actions>
-      </.header>
+      <section class="rounded-2xl border border-base-300 bg-base-200/70 p-6 shadow-sm">
+        <div class="rounded-2xl border border-base-300 bg-base-100/80 p-6 shadow-sm">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h1 class="text-2xl font-bold leading-tight text-base-content">My Videos</h1>
+              <p class="mt-1 text-sm text-base-content/70">Manage your uploads and jump into playback.</p>
+            </div>
+            <.link navigate={~p"/videos/new"}>
+              <.button id="add-video-button">Add Video</.button>
+            </.link>
+          </div>
+        </div>
 
-      <.table id="videos" rows={@videos}>
-        <:col :let={video} label="Title">{video.title}</:col>
-        <:col :let={video} label="Category">
-          {if(video.category, do: video.category.name, else: "-")}
-        </:col>
-        <:col :let={video} label="Added">
-          {Calendar.strftime(video.inserted_at, "%b %d, %Y")}
-        </:col>
-        <:action :let={video}>
-          <.link navigate={~p"/watch/#{video}"}>Watch</.link>
-        </:action>
-        <:action :let={video}>
-          <.link navigate={~p"/videos/#{video}"}>View</.link>
-        </:action>
-        <:action :let={video}>
-          <.link navigate={~p"/videos/#{video}/edit"}>Edit</.link>
-        </:action>
-        <:action :let={video}>
-          <.link phx-click="delete" phx-value-id={video.slug} data-confirm="Delete this video?">
-            Delete
-          </.link>
-        </:action>
-      </.table>
+        <div id="videos" class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <%= for video <- @videos do %>
+            <article class="rounded-xl border border-base-300 bg-base-100 p-4 shadow-sm">
+              <h3 class="line-clamp-2 text-lg font-semibold text-base-content">{video.title}</h3>
+              <p class="mt-1 text-sm text-base-content/70">
+                {if(video.category, do: video.category.name, else: "Uncategorized")}
+              </p>
+              <p class="mt-1 text-xs text-base-content/60">
+                Added {Calendar.strftime(video.inserted_at, "%b %d, %Y")}
+              </p>
 
-      <%= if Enum.empty?(@videos) do %>
-        <p class="mt-8 text-center text-gray-500">
-          You haven't added any videos yet.
-          <.link navigate={~p"/videos/new"} class="watch_hover">
-            Add your first video
-          </.link>
-        </p>
-      <% end %>
+              <div class="mt-4 flex flex-wrap items-center gap-2">
+                <.link navigate={~p"/watch/#{video}"} class="btn btn-sm">
+                  Watch
+                </.link>
+                <.link navigate={~p"/videos/#{video}"} class="btn btn-sm btn-ghost">
+                  View
+                </.link>
+                <.link navigate={~p"/videos/#{video}/edit"} class="btn btn-sm btn-ghost">
+                  Edit
+                </.link>
+                <.link
+                  phx-click="delete"
+                  phx-value-id={video.slug}
+                  data-confirm="Delete this video?"
+                  class="btn btn-sm btn-ghost text-error"
+                >
+                  Delete
+                </.link>
+              </div>
+            </article>
+          <% end %>
+        </div>
+
+        <%= if Enum.empty?(@videos) do %>
+          <p class="mt-8 text-center text-base-content/70">
+            You haven't added any videos yet.
+            <.link navigate={~p"/videos/new"} class="watch_hover">
+              Add your first video
+            </.link>
+          </p>
+        <% end %>
+      </section>
     <% :new -> %>
       <.header>
         Add New Video
@@ -172,7 +187,7 @@
         <.back navigate={~p"/videos"}>Back to videos</.back>
       </div>
     <% :watch -> %>
-      <div class="max-w-4xl mx-auto" id="video-watch-root">
+      <div class="mx-auto max-w-7xl" id="video-watch-root">
         <.header>
           {@video.title}
           <:subtitle>
@@ -206,130 +221,134 @@
           data-room-playing={to_string(@room_playing)}
           data-room-current-ms={@room_current_ms}
         >
-          <div
-            id="video-container"
-            data-id={@video.id}
-            data-player-id="video-player"
-            class="aspect-video bg-black rounded-lg overflow-hidden"
-          >
-            <%= if youtube_id(@video) do %>
-              <iframe
-                id="video-player"
-                width="100%"
-                height="100%"
-                src={youtube_embed_url(@video)}
-                frameborder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowfullscreen
+          <div class="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.65fr)_minmax(18rem,0.65fr)]">
+            <div>
+              <div
+                id="video-container"
+                data-id={@video.id}
+                data-player-id="video-player"
+                class="aspect-video bg-black rounded-lg overflow-hidden"
               >
-              </iframe>
-            <% else %>
-              <div class="flex items-center justify-center h-full text-white">
-                <p>Unable to load video. Invalid YouTube URL.</p>
-              </div>
-            <% end %>
-          </div>
-
-          <%= if @video.description do %>
-            <div class="mt-4 p-4 bg-slate-200 rounded-lg">
-              <h3 class="font-semibold text-gray-700">Description</h3>
-              <p class="mt-2 text-gray-600">{@video.description}</p>
-            </div>
-          <% end %>
-
-          <div class="mt-8">
-            <h3 class="text-lg font-semibold text-slate-500">Annotations</h3>
-
-            <%= if @current_user do %>
-              <form id="annotation-form" class="mt-4">
-                <div class="flex items-stretch gap-0 [&_.fieldset]:m-0 [&_.fieldset]:p-0 [&_.fieldset]:flex-1 [&_.fieldset>label]:m-0 [&_.fieldset>label]:block [&_.fieldset>label]:h-12">
-                  <.input
-                    id="annotation-body"
-                    name="body"
-                    type="text"
-                    value=""
-                    placeholder="Add a comment at the current time"
-                    class="w-full input h-full rounded-r-none"
-                  />
-                  <input type="hidden" id="annotation-at" name="at" value="0" />
-                  <button
-                    id="annotation-submit"
-                    type="submit"
-                    class="btn self-end h-12 min-h-12 rounded-l-none"
+                <%= if youtube_id(@video) do %>
+                  <iframe
+                    id="video-player"
+                    width="100%"
+                    height="100%"
+                    src={youtube_embed_url(@video)}
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen
                   >
-                    Post
-                  </button>
-                </div>
-              </form>
-            <% else %>
-              <p class="mt-4 text-gray-500">
-                <.link navigate={~p"/sessions/new"} class="watch_hover">
-                  Log in
-                </.link>
-                to add annotations.
-              </p>
-            <% end %>
-
-            <div id="annotations" class="mt-6 space-y-3">
-              <%= for annotation <- @annotations do %>
-                <div
-                  id={"annotation-#{annotation.id}"}
-                  class="annotation p-3 bg-slate-200 rounded-lg shadow-sm"
-                  data-id={annotation.id}
-                  data-at={annotation.at}
-                >
-                  <div class="flex items-center justify-between gap-2">
-                    <div class="flex items-center gap-2">
-                      <span class="text-xs font-mono text-slate-600 px-2 py-1 rounded">
-                        {format_time(annotation.at)}
-                      </span>
-                      <span class="font-semibold text-slate-600">{annotation.user.username}</span>
-                    </div>
-                    <%= if @current_user && annotation.user.id == @current_user.id do %>
-                      <div class="relative">
-                        <button
-                          type="button"
-                          class="btn btn-ghost btn-xs btn-square"
-                          data-menu-toggle
-                          data-id={annotation.id}
-                          aria-label="Annotation actions"
-                        >
-                          <.icon name="hero-ellipsis-horizontal" class="size-4" />
-                        </button>
-                        <div
-                          id={"annotation-menu-#{annotation.id}"}
-                          class="hidden absolute right-0 top-7 z-10 w-28 overflow-hidden rounded-md border border-base-300 bg-base-100 shadow-lg"
-                        >
-                          <button
-                            type="button"
-                            class="block w-full px-3 py-2 text-left text-sm hover:bg-base-200"
-                            data-action="edit"
-                            data-id={annotation.id}
-                          >
-                            Edit
-                          </button>
-                          <button
-                            type="button"
-                            class="block w-full px-3 py-2 text-left text-sm text-error hover:bg-base-200"
-                            data-action="delete"
-                            data-id={annotation.id}
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </div>
-                    <% end %>
+                  </iframe>
+                <% else %>
+                  <div class="flex items-center justify-center h-full text-white">
+                    <p>Unable to load video. Invalid YouTube URL.</p>
                   </div>
-                  <p class="annotation-body mt-1 text-gray-600">{annotation.body}</p>
+                <% end %>
+              </div>
+
+              <%= if @video.description do %>
+                <div class="mt-4 rounded-lg border border-base-300 bg-base-200 p-4">
+                  <h3 class="font-semibold text-base-content">Description</h3>
+                  <p class="mt-2 text-base-content/80">{@video.description}</p>
                 </div>
               <% end %>
             </div>
 
-            <%= if Enum.empty?(@annotations) do %>
-              <p id="no-annotations" class="mt-4 text-center text-gray-500">
-                No annotations yet. Be the first to comment!
-              </p>
-            <% end %>
+            <aside class="rounded-lg border border-base-300 bg-base-100 p-4 lg:max-h-[72vh] lg:overflow-y-auto">
+              <h3 class="text-lg font-semibold text-base-content">Annotations</h3>
+
+              <%= if @current_user do %>
+                <form id="annotation-form" class="mt-4">
+                  <div class="flex items-stretch gap-0 [&_.fieldset]:m-0 [&_.fieldset]:p-0 [&_.fieldset]:flex-1 [&_.fieldset>label]:m-0 [&_.fieldset>label]:block [&_.fieldset>label]:h-12">
+                    <.input
+                      id="annotation-body"
+                      name="body"
+                      type="text"
+                      value=""
+                      placeholder="Add a comment at the current time"
+                      class="w-full input h-full rounded-r-none"
+                    />
+                    <input type="hidden" id="annotation-at" name="at" value="0" />
+                    <button
+                      id="annotation-submit"
+                      type="submit"
+                      class="btn self-end h-12 min-h-12 rounded-l-none"
+                    >
+                      Post
+                    </button>
+                  </div>
+                </form>
+              <% else %>
+                <p class="mt-4 text-base-content/70">
+                  <.link navigate={~p"/sessions/new"} class="watch_hover">
+                    Log in
+                  </.link>
+                  to add annotations.
+                </p>
+              <% end %>
+
+              <div id="annotations" class="mt-6 space-y-3">
+                <%= for annotation <- @annotations do %>
+                  <div
+                    id={"annotation-#{annotation.id}"}
+                    class="annotation rounded-lg border border-base-300 bg-base-200 p-3 shadow-sm"
+                    data-id={annotation.id}
+                    data-at={annotation.at}
+                  >
+                    <div class="flex items-center justify-between gap-2">
+                      <div class="flex items-center gap-2">
+                        <span class="rounded bg-base-300 px-2 py-1 text-xs font-mono text-base-content">
+                          {format_time(annotation.at)}
+                        </span>
+                        <span class="font-semibold text-base-content">{annotation.user.username}</span>
+                      </div>
+                      <%= if @current_user && annotation.user.id == @current_user.id do %>
+                        <div class="relative">
+                          <button
+                            type="button"
+                            class="btn btn-xs btn-square"
+                            data-menu-toggle
+                            data-id={annotation.id}
+                            aria-label="Annotation actions"
+                          >
+                            <.icon name="hero-ellipsis-horizontal" class="size-4" />
+                          </button>
+                          <div
+                            id={"annotation-menu-#{annotation.id}"}
+                            class="hidden absolute right-0 top-7 z-10 w-28 overflow-hidden rounded-md border border-base-300 bg-base-100 shadow-lg"
+                          >
+                            <button
+                              type="button"
+                              class="block w-full px-3 py-2 text-left text-sm hover:bg-base-200"
+                              data-action="edit"
+                              data-id={annotation.id}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              class="block w-full px-3 py-2 text-left text-sm text-error hover:bg-base-200"
+                              data-action="delete"
+                              data-id={annotation.id}
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                      <% end %>
+                    </div>
+                    <p class="annotation-body mt-1 text-base-content/80">{annotation.body}</p>
+                  </div>
+                <% end %>
+              </div>
+
+              <%= if Enum.empty?(@annotations) do %>
+                <p id="no-annotations" class="mt-4 text-center text-base-content/70">
+                  No annotations yet. Be the first to comment!
+                </p>
+              <% end %>
+            </aside>
           </div>
         </div>
 

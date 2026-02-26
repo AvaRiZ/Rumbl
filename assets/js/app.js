@@ -58,6 +58,37 @@ function loadYoutubeIframeApi() {
   return youtubeIframeApiPromise
 }
 
+function setTheme(theme) {
+  if (theme === "system") {
+    localStorage.removeItem("phx:theme")
+    document.documentElement.removeAttribute("data-theme")
+    return
+  }
+
+  localStorage.setItem("phx:theme", theme)
+  document.documentElement.setAttribute("data-theme", theme)
+}
+
+const ThemeSwitch = {
+  mounted() {
+    const storedTheme = localStorage.getItem("phx:theme")
+    const currentTheme = document.documentElement.getAttribute("data-theme")
+    this.el.checked = (currentTheme || storedTheme) === "dark"
+
+    this.handleChange = () => {
+      setTheme(this.el.checked ? "dark" : "light")
+    }
+
+    this.el.addEventListener("change", this.handleChange)
+  },
+
+  destroyed() {
+    if (this.handleChange) {
+      this.el.removeEventListener("change", this.handleChange)
+    }
+  }
+}
+
 const VideoWatch = {
   mounted() {
     const token = this.el.dataset.userToken
@@ -382,7 +413,7 @@ const VideoWatch = {
     if (container && container.children.length === 0 && !this.el.querySelector("#no-annotations")) {
       const noAnnotations = document.createElement("p")
       noAnnotations.id = "no-annotations"
-      noAnnotations.className = "mt-4 text-center text-gray-500"
+      noAnnotations.className = "mt-4 text-center text-base-content/70"
       noAnnotations.textContent = "No annotations yet. Be the first to comment!"
       container.insertAdjacentElement("afterend", noAnnotations)
     }
@@ -440,7 +471,7 @@ const VideoWatch = {
   buildAnnotationElement(annotation) {
     const wrapper = document.createElement("div")
     wrapper.id = `annotation-${annotation.id}`
-    wrapper.className = "annotation p-3 bg-slate-200 rounded-lg shadow-sm"
+    wrapper.className = "annotation rounded-lg border border-base-300 bg-base-200 p-3 shadow-sm"
     wrapper.dataset.id = annotation.id
     wrapper.dataset.at = annotation.at
 
@@ -451,11 +482,11 @@ const VideoWatch = {
     meta.className = "flex items-center gap-2"
 
     const time = document.createElement("span")
-    time.className = "text-xs font-mono text-brand bg-brand/10 px-2 py-1 rounded"
+    time.className = "rounded bg-base-300 px-2 py-1 text-xs font-mono text-base-content"
     time.textContent = this.formatTime(annotation.at)
 
     const user = document.createElement("span")
-    user.className = "font-semibold text-gray-800"
+    user.className = "font-semibold text-base-content"
     user.textContent = annotation.user.username
 
     meta.append(time, user)
@@ -497,7 +528,7 @@ const VideoWatch = {
     }
 
     const body = document.createElement("p")
-    body.className = "annotation-body mt-1 text-gray-600"
+    body.className = "annotation-body mt-1 text-base-content/80"
     body.textContent = annotation.body
 
     wrapper.append(header, body)
@@ -516,7 +547,7 @@ const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   params: {_csrf_token: csrfToken},
-  hooks: {VideoWatch, ...colocatedHooks},
+  hooks: {VideoWatch, ThemeSwitch, ...colocatedHooks},
 })
 
 // Show progress bar on live navigation and form submits

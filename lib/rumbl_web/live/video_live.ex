@@ -3,6 +3,7 @@ defmodule RumblWeb.VideoLive do
 
   alias Rumbl.Multimedia
   alias Rumbl.Multimedia.Video
+  alias Rumbl.WatchAlong
 
   embed_templates "video_live/*"
 
@@ -15,6 +16,11 @@ defmodule RumblWeb.VideoLive do
      socket
      |> assign(:page_title, "Videos")
      |> assign(:video, nil)
+     |> assign(:room_code, nil)
+     |> assign(:room_host_id, nil)
+     |> assign(:room_playing, false)
+     |> assign(:room_current_ms, 0)
+     |> assign(:created_room_code, nil)
      |> assign(:annotations, [])
      |> assign(:categories, [])
      |> assign(:form, to_form(Multimedia.change_video(%Video{})))}
@@ -43,6 +49,35 @@ defmodule RumblWeb.VideoLive do
      |> put_flash(:info, "Video deleted successfully.")}
   end
 
+  @impl true
+  def handle_event("create_code", _params, socket) do
+    case socket.assigns.current_user do
+      nil ->
+        {:noreply,
+         socket
+         |> assign(:created_room_code, nil)
+         |> put_flash(:error, "You must be logged in to create a room code.")}
+
+      current_user ->
+        case WatchAlong.create_room(current_user, socket.assigns.video) do
+          {:ok, room} ->
+            {:noreply,
+             socket
+             |> assign(:created_room_code, room.code)
+             |> put_flash(:info, "Room code #{room.code} created. Share it to invite others.")
+             |> push_navigate(to: ~p"/watch/#{socket.assigns.video}?#{[room_code: room.code]}")}
+
+          {:error, %Ecto.Changeset{}} ->
+            {:noreply, put_flash(socket, :error, "Failed to create watch room code.")}
+        end
+    end
+  end
+
+  @impl true
+  def handle_event("clear_code", _params, socket) do
+    {:noreply, assign(socket, :created_room_code, nil)}
+  end
+
   defp apply_action(socket, :index, _params) do
     socket
     |> assign(:page_title, "My Videos")
@@ -62,6 +97,11 @@ defmodule RumblWeb.VideoLive do
     socket
     |> assign(:page_title, video.title)
     |> assign(:video, video)
+    |> assign(:room_code, nil)
+    |> assign(:room_host_id, nil)
+    |> assign(:room_playing, false)
+    |> assign(:room_current_ms, 0)
+    |> assign(:created_room_code, nil)
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
@@ -74,8 +114,26 @@ defmodule RumblWeb.VideoLive do
     |> assign(:form, to_form(Multimedia.change_video(video)))
   end
 
-  defp apply_action(socket, :watch, %{"id" => id}) do
+  defp apply_action(socket, :watch, %{"id" => id} = params) do
     video = Multimedia.get_video!(id)
+
+    room_code =
+      case params["room_code"] do
+        nil -> nil
+        code -> code |> to_string() |> String.trim() |> String.upcase()
+      end
+
+    room =
+      case room_code do
+        nil ->
+          nil
+
+        code ->
+          case WatchAlong.get_room_by_code(code) do
+            %{video_id: room_video_id} = room when room_video_id == video.id -> room
+            _other -> nil
+          end
+      end
 
     user_token =
       if socket.assigns.current_user do
@@ -85,6 +143,11 @@ defmodule RumblWeb.VideoLive do
     socket
     |> assign(:page_title, "Watch #{video.title}")
     |> assign(:video, video)
+    |> assign(:room_code, if(room, do: room.code, else: nil))
+    |> assign(:room_host_id, if(room, do: room.host_id, else: nil))
+    |> assign(:room_playing, if(room, do: room.playing, else: false))
+    |> assign(:room_current_ms, if(room, do: room.current_ms, else: 0))
+    |> assign(:created_room_code, nil)
     |> assign(:annotations, Multimedia.list_annotations(video))
     |> assign(:user_token, user_token)
   end
@@ -124,6 +187,17 @@ defmodule RumblWeb.VideoLive do
   end
 
   defp youtube_id(video), do: Video.youtube_id(video)
+
+  defp youtube_embed_url(video) do
+    case youtube_id(video) do
+      nil ->
+        nil
+
+      id ->
+        origin = URI.encode_www_form(RumblWeb.Endpoint.url())
+        "https://www.youtube.com/embed/#{id}?enablejsapi=1&origin=#{origin}&playsinline=1&rel=0"
+    end
+  end
 
   defp format_time(ms) do
     total_seconds = div(ms, 1000)

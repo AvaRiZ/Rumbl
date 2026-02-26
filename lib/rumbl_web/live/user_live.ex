@@ -28,7 +28,7 @@ defmodule RumblWeb.UserLive do
         {:noreply,
          socket
          |> put_flash(:info, "Profile updated successfully")
-         |> push_patch(to: ~p"/users/#{user}")}
+         |> push_navigate(to: ~p"/users/#{user}")}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, form: to_form(changeset))}

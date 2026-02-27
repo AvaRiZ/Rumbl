@@ -133,6 +133,36 @@ defmodule Rumbl.Multimedia do
     |> Repo.insert()
   end
 
+  @doc """
+  Gets a category by id.
+  """
+  def get_category!(id) do
+    Repo.get!(Category, id)
+  end
+
+  @doc """
+  Deletes a category.
+  """
+  def delete_category(%Category{} = category) do
+    Repo.delete(category)
+  end
+
+  @doc """
+  Updates a category.
+  """
+  def update_category(%Category{} = category, attrs) do
+    category
+    |> Category.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking category changes.
+  """
+  def change_category(%Category{} = category, attrs \\ %{}) do
+    Category.changeset(category, attrs)
+  end
+
   # ============================================================================
   # Annotations
   # ============================================================================

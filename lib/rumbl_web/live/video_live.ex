@@ -23,6 +23,8 @@ defmodule RumblWeb.VideoLive do
      |> assign(:created_room_code, nil)
      |> assign(:annotations, [])
      |> assign(:categories, [])
+     |> assign(:category_items, [])
+     |> assign(:category_form, empty_category_form())
      |> assign(:form, to_form(Multimedia.change_video(%Video{})))}
   end
 
@@ -78,6 +80,44 @@ defmodule RumblWeb.VideoLive do
     {:noreply, assign(socket, :created_room_code, nil)}
   end
 
+  @impl true
+  def handle_event("create_category", %{"category" => category_params}, socket) do
+    params = %{"name" => String.trim(category_params["name"] || "")}
+
+    case Multimedia.create_category(params) do
+      {:ok, _category} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "Category added.")
+         |> refresh_category_assigns()
+         |> assign(:category_form, empty_category_form())}
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        {:noreply,
+         socket
+         |> refresh_category_assigns()
+         |> assign(:category_form, to_form(changeset))}
+    end
+  end
+
+  @impl true
+  def handle_event("delete_category", %{"id" => id}, socket) do
+    case Integer.parse(to_string(id)) do
+      {category_id, ""} ->
+        category = Multimedia.get_category!(category_id)
+        {:ok, _category} = Multimedia.delete_category(category)
+
+        {:noreply,
+         socket
+         |> put_flash(:info, "Category deleted.")
+         |> refresh_category_assigns()
+         |> maybe_reload_video_after_category_change()}
+
+      _ ->
+        {:noreply, put_flash(socket, :error, "Invalid category id.")}
+    end
+  end
+
   defp apply_action(socket, :index, _params) do
     socket
     |> assign(:page_title, "My Videos")
@@ -87,7 +127,8 @@ defmodule RumblWeb.VideoLive do
   defp apply_action(socket, :new, _params) do
     socket
     |> assign(:page_title, "Add New Video")
-    |> assign(:categories, Multimedia.category_options())
+    |> refresh_category_assigns()
+    |> assign(:category_form, empty_category_form())
     |> assign(:form, to_form(Multimedia.change_video(%Video{})))
   end
 
@@ -110,7 +151,8 @@ defmodule RumblWeb.VideoLive do
     socket
     |> assign(:page_title, "Edit Video")
     |> assign(:video, video)
-    |> assign(:categories, Multimedia.category_options())
+    |> refresh_category_assigns()
+    |> assign(:category_form, empty_category_form())
     |> assign(:form, to_form(Multimedia.change_video(video)))
   end
 
@@ -163,7 +205,7 @@ defmodule RumblWeb.VideoLive do
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply,
          socket
-         |> assign(:categories, Multimedia.category_options())
+         |> refresh_category_assigns()
          |> assign(:form, to_form(changeset))}
     end
   end
@@ -181,10 +223,32 @@ defmodule RumblWeb.VideoLive do
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply,
          socket
-         |> assign(:categories, Multimedia.category_options())
+         |> refresh_category_assigns()
          |> assign(:form, to_form(changeset))}
     end
   end
+
+  defp refresh_category_assigns(socket) do
+    category_items = Multimedia.list_categories()
+
+    socket
+    |> assign(:category_items, category_items)
+    |> assign(:categories, Enum.map(category_items, &{&1.name, &1.id}))
+  end
+
+  defp maybe_reload_video_after_category_change(socket) do
+    if socket.assigns.live_action == :edit do
+      video = Multimedia.get_user_video!(socket.assigns.current_user, socket.assigns.video.slug)
+
+      socket
+      |> assign(:video, video)
+      |> assign(:form, to_form(Multimedia.change_video(video)))
+    else
+      socket
+    end
+  end
+
+  defp empty_category_form, do: to_form(%{"name" => ""}, as: :category)
 
   defp youtube_id(video), do: Video.youtube_id(video)
 

@@ -1,4 +1,7 @@
 defmodule RumblWeb.VideoChannel do
+  @moduledoc """
+  A Phoenix Channel for handling real-time video annotations.
+  """
   use RumblWeb, :channel
 
   alias Rumbl.{Accounts, Multimedia}

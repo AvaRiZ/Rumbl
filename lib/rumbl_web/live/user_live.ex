@@ -49,6 +49,25 @@ defmodule RumblWeb.UserLive do
     end
   end
 
+  @impl true
+  def handle_event("delete_account", _params, socket) do
+    current_user = socket.assigns.current_user
+    viewed_user = socket.assigns.user
+
+    if current_user.id && viewed_user && current_user.id == viewed_user.id do
+      case Accounts.delete_user(socket.assigns.user) do
+        {:ok, _user} ->
+          {:noreply,
+           socket
+           |> put_flash(:info, "Account Deleted")
+           |> push_navigate(to: ~p"/")}
+
+        {:error, _reason} ->
+          {:noreply, put_flash(socket, :error, "Could not delete account")}
+      end
+    end
+  end
+
   defp apply_action(socket, action, %{"id" => id}) when action in [:show, :edit] do
     user = Accounts.get_user!(id)
     videos = Multimedia.list_user_videos(user)

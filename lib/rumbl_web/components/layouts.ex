@@ -113,7 +113,7 @@ defmodule RumblWeb.Layouts do
         </div>
       <% end %>
     </aside>
-    <header class="navbar border-b border-base-300 bg-base-100">
+    <header class="navbar relative border-b border-base-300 bg-base-100">
       <button
         id="sidebar-toggle"
         class="btn btn-square btn-ghost"
@@ -126,11 +126,21 @@ defmodule RumblWeb.Layouts do
         <.icon name="hero-bars-3" class="h-5 w-5" />
       </button>
 
-      <div class="flex-1">
-        <.link navigate={~p"/"} class="text-lg font-bold">
+      <div class="pointer-events-none absolute inset-0 flex items-center justify-center">
+        <.link
+          navigate={~p"/"}
+          class="pointer-events-auto inline-flex items-center gap-2 text-lg font-bold"
+        >
+          <img
+            src={~p"/images/logo.svg"}
+            alt="Rumbl logo"
+            class="h-7 w-7 object-contain"
+          />
           <span class="text-xl font-bold text-brand">Rumbl</span>
         </.link>
       </div>
+
+      <div class="flex-1" />
 
       <div class="flex-none">
         <ul class="flex items-center gap-2 px-1 sm:gap-3">

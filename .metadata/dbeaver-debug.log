@@ -1,25 +1,26 @@
-2026-02-26 00:24:59.329 - DBeaver 25.3.5.202602151808 is starting
-2026-02-26 00:24:59.330 - OS: Linux 6.18.7-76061807-generic (amd64)
-2026-02-26 00:24:59.331 - Java version: 21.0.8 by Eclipse Adoptium (64bit)
-2026-02-26 00:24:59.331 - Install path: '/usr/share/dbeaver-ce'
-2026-02-26 00:24:59.331 - Instance path: 'file:/home/yajito/rumbl_app_upgraded/'
-2026-02-26 00:24:59.336 - Memory available 64Mb/1024Mb
-2026-02-26 00:24:59.350 - Create display
-2026-02-26 00:24:59.538 - Initialize desktop platform...
-2026-02-26 00:24:59.794 - BounceCastle bundle found. Use JCE provider BC
+2026-02-27 08:05:59.082 - DBeaver 25.3.5.202602151808 is starting
+2026-02-27 08:05:59.083 - OS: Linux 6.18.7-76061807-generic (amd64)
+2026-02-27 08:05:59.083 - Java version: 21.0.8 by Eclipse Adoptium (64bit)
+2026-02-27 08:05:59.084 - Install path: '/usr/share/dbeaver-ce'
+2026-02-27 08:05:59.084 - Instance path: 'file:/home/yajito/rumbl_app_upgraded/'
+2026-02-27 08:05:59.088 - Memory available 64Mb/1024Mb
+2026-02-27 08:05:59.100 - Create display
+2026-02-27 08:05:59.289 - Initialize desktop platform...
+2026-02-27 08:05:59.621 - BounceCastle bundle found. Use JCE provider BC
 > Start Core File Systems [org.eclipse.core.filesystem 1.11.400.v20251107-0507]
 > Start Core Resource Management [org.eclipse.core.resources 3.23.100.v20251106-1705]
 > Start Team Support Core [org.eclipse.team.core 3.10.900.v20251104-0924]
 > Start DBeaver UI Navigator [org.jkiss.dbeaver.ui.navigator 1.0.173.202602151808]
-2026-02-26 00:25:00.112 - Initialize base platform...
-2026-02-26 00:25:00.130 - send collected statistics
-2026-02-26 00:25:00.146 - Platform initialized (608ms)
+2026-02-27 08:06:00.016 - Initialize base platform...
+2026-02-27 08:06:00.053 - send collected statistics
+2026-02-27 08:06:00.073 - Platform initialized (784ms)
 > Start Equinox Java Authentication and Authorization Service (JAAS) [org.eclipse.equinox.security 1.4.700.v20250622-1644]
 > Start Internet Connection Management UI [org.eclipse.ui.net 1.5.500.v20250611-0855]
 > Start Internet Connection Management [org.eclipse.core.net 1.5.800.v20250613-1119]
-2026-02-26 00:25:00.363 - Proxy service 'org.eclipse.core.net.proxy.IProxyService' loaded
-2026-02-26 00:25:00.417 - Starting instance server at http://localhost:32913
-2026-02-26 00:25:00.433 - Run workbench
+2026-02-27 08:06:00.411 - Proxy service 'org.eclipse.core.net.proxy.IProxyService' loaded
+2026-02-27 08:06:00.823 - Error accessing instance server: java.net.ConnectException
+2026-02-27 08:06:00.858 - Starting instance server at http://localhost:33399
+2026-02-27 08:06:00.871 - Run workbench
 > Start Eclipse e4 Workbench SWT [org.eclipse.e4.ui.workbench.swt 0.17.1000.v20251023-0611]
 > Start Eclipse Application Services [org.eclipse.e4.core.services 2.5.300.v20251112-1253]
 > Start Eclipse UI Application Services [org.eclipse.e4.ui.services 1.6.600.v20251023-1358]
@@ -34,53 +35,33 @@
 > Start DBeaver AI Model [org.jkiss.dbeaver.model.ai 2.0.16.202602151808]
 > Start DBeaver AI UI [org.jkiss.dbeaver.ui.ai 1.0.75.202602151808]
 > Start Eclipse CSS SWT Support [org.eclipse.e4.ui.css.swt 0.15.700.v20251023-1511]
+2026-02-27 08:06:03.078 - Open [https://stats.dbeaver.com/send-statistics?session=6fcdccea-67e7-4ea5-be53-b5c795cc0a11&time=1772065505]
 > Start JFace Text [org.eclipse.jface.text 3.29.0.v20251112-0859]
 > Start Default Text Editor [org.eclipse.ui.editors 3.20.200.v20251125-0939]
 > Start Text Editor Framework [org.eclipse.ui.workbench.texteditor 3.19.400.v20251105-0815]
-2026-02-26 00:25:03.034 - Configure workbench window
+2026-02-27 08:06:04.045 - Configure workbench window
 > Start DBeaver SQL Model [org.jkiss.dbeaver.model.sql 1.0.163.202602151808]
-2026-02-26 00:25:03.296 - Total database drivers: 126 (126)
+2026-02-27 08:06:04.399 - Total database drivers: 126 (126)
 > Start Help System Core [org.eclipse.help 3.10.600.v20250613-0437]
-2026-02-26 00:25:03.420 - Create actions
-2026-02-26 00:25:04.209 - Initialize workbench window
-2026-02-26 00:25:04.242 - Finish initialization
+2026-02-27 08:06:04.624 - Create actions
+2026-02-27 08:06:05.983 - Initialize workbench window
+2026-02-27 08:06:06.084 - Finish initialization
 > Start DBeaver UI Editors - Data [org.jkiss.dbeaver.ui.editors.data 1.0.173.202602151808]
 > Start DBeaver UI Editors - SQL [org.jkiss.dbeaver.ui.editors.sql 1.0.173.202602151808]
 > Start DBeaver Sample Database [org.jkiss.dbeaver.ui.config.sample 1.0.210.202602151808]
-2026-02-26 00:25:06.656 - Open [https://dbeaver.io/product/version.xml]
-2026-02-26 00:25:06.833 - Connect with 'rumbl_dev' (postgres-jdbc-19c9242dc37-17b216bca8fc2f52)
+2026-02-27 08:06:08.949 - Open [https://dbeaver.io/product/version.xml]
+2026-02-27 08:06:09.113 - Connect with 'rumbl_dev' (postgres-jdbc-19c9242dc37-17b216bca8fc2f52)
 > Start DBeaver JDBC Model [org.jkiss.dbeaver.model.jdbc 1.0.66.202602151808]
 > Start DBeaver PostgreSQL Model [org.jkiss.dbeaver.ext.postgresql 2.1.246.202602151808]
 > Start DBeaver GIS Support [org.jkiss.dbeaver.data.gis 1.0.197.202602151808]
-2026-02-26 00:25:07.168 - Execution context opened (rumbl_dev; Main <rumbl_dev>; 0)
-2026-02-26 00:25:07.183 - Initiate connection to PostgreSQL database [rumbl_dev@localhost] for Main <rumbl_dev>
-2026-02-26 00:25:07.912 - Execution context opened (rumbl_dev; Metadata <rumbl_dev>; 1)
-2026-02-26 00:25:07.913 - Initiate connection to PostgreSQL database [rumbl_dev@localhost] for Metadata <rumbl_dev>
-2026-02-26 00:25:08.144 - Connected (postgres-jdbc-19c9242dc37-17b216bca8fc2f52, PostgreSQL JDBC Driver [42.7.2])
+2026-02-27 08:06:09.347 - Execution context opened (rumbl_dev; Main <rumbl_dev>; 0)
+2026-02-27 08:06:09.373 - Initiate connection to PostgreSQL database [rumbl_dev@localhost] for Main <rumbl_dev>
+2026-02-27 08:06:10.102 - Execution context opened (rumbl_dev; Metadata <rumbl_dev>; 1)
+2026-02-27 08:06:10.103 - Initiate connection to PostgreSQL database [rumbl_dev@localhost] for Metadata <rumbl_dev>
+2026-02-27 08:06:10.288 - Connected (postgres-jdbc-19c9242dc37-17b216bca8fc2f52, PostgreSQL JDBC Driver [42.7.2])
 > Start DBeaver Dashboard UI [org.jkiss.dbeaver.ui.dashboard 1.0.170.202602151808]
 > Start GEF Classic Draw2d [org.eclipse.draw2d 3.21.0.202512020742]
 > Start GEF Classic GEF (MVC) [org.eclipse.gef 3.24.0.202511201732]
 > Start DBeaver ERD UI [org.jkiss.dbeaver.ui.editors.erd 3.1.14.202602151808]
 > Start DBeaver ERD Model [org.jkiss.dbeaver.model.erd 1.1.14.202602151808]
-> Start Data Transfer UI [org.jkiss.dbeaver.data.transfer.ui 1.0.157.202602151808]
-> Start DBeaver Data Transfer [org.jkiss.dbeaver.data.transfer 2.0.157.202602151808]
-> Start DBeaver Tasks View [org.jkiss.dbeaver.tasks.ui.view 1.0.122.202602151808]
-> Start DBeaver SQL Language Semantic Model [org.jkiss.dbeaver.model.lsm 1.0.68.202602151808]
-2026-02-26 05:42:16.166 - Execution context closed (rumbl_dev, 0)
-2026-02-26 05:42:16.202 - Execution context closed (rumbl_dev, 1)
-2026-02-26 05:42:16.204 - Disconnected (postgres-jdbc-19c9242dc37-17b216bca8fc2f52)
-2026-02-26 05:42:24.619 - Connect with 'rumbl_dev' (postgres-jdbc-19c9242dc37-17b216bca8fc2f52)
-2026-02-26 05:42:24.643 - Execution context opened (rumbl_dev; Main <rumbl_dev>; 2)
-2026-02-26 05:42:24.647 - Initiate connection to PostgreSQL database [rumbl_dev@localhost] for Main <rumbl_dev>
-2026-02-26 05:42:25.002 - Execution context opened (rumbl_dev; Metadata <rumbl_dev>; 3)
-2026-02-26 05:42:25.003 - Initiate connection to PostgreSQL database [rumbl_dev@localhost] for Metadata <rumbl_dev>
-2026-02-26 05:42:25.170 - Connected (postgres-jdbc-19c9242dc37-17b216bca8fc2f52, PostgreSQL JDBC Driver [42.7.2])
-2026-02-26 23:59:33.292 - Execution context closed (rumbl_dev, 2)
-2026-02-26 23:59:33.462 - Execution context closed (rumbl_dev, 3)
-2026-02-26 23:59:33.466 - Disconnected (postgres-jdbc-19c9242dc37-17b216bca8fc2f52)
-2026-02-27 00:02:49.855 - Connect with 'rumbl_dev' (postgres-jdbc-19c9242dc37-17b216bca8fc2f52)
-2026-02-27 00:02:49.874 - Execution context opened (rumbl_dev; Main <rumbl_dev>; 4)
-2026-02-27 00:02:49.881 - Initiate connection to PostgreSQL database [rumbl_dev@localhost] for Main <rumbl_dev>
-2026-02-27 00:02:50.259 - Execution context opened (rumbl_dev; Metadata <rumbl_dev>; 5)
-2026-02-27 00:02:50.259 - Initiate connection to PostgreSQL database [rumbl_dev@localhost] for Metadata <rumbl_dev>
-2026-02-27 00:02:50.398 - Connected (postgres-jdbc-19c9242dc37-17b216bca8fc2f52, PostgreSQL JDBC Driver [42.7.2])
+2026-02-27 08:06:20.963 - Statistics sent (OK)

@@ -6,7 +6,9 @@
           <div class="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h1 class="text-2xl font-bold leading-tight text-base-content">My Videos</h1>
-              <p class="mt-1 text-sm text-base-content/70">Manage your uploads and jump into playback.</p>
+              <p class="mt-1 text-sm text-base-content/70">
+                Manage your uploads and jump into playback.
+              </p>
             </div>
             <.link navigate={~p"/videos/new"}>
               <.button id="add-video-button">Add Video</.button>
@@ -58,35 +60,85 @@
         <% end %>
       </section>
     <% :new -> %>
-      <.header>
-        Add New Video
-        <:subtitle>Share a YouTube video with the community</:subtitle>
-      </.header>
+      <section
+        id="add-video-section"
+        class="mx-auto mt-10 max-w-md rounded-2xl border border-base-300 bg-base-100 p-6 shadow-sm"
+      >
+        <.header>
+          Add New Video
+          <:subtitle>Share a YouTube video with the community</:subtitle>
+        </.header>
 
-      <.form for={@form} id="video-form" phx-submit="save" class="space-y-4">
-        <.input field={@form[:title]} type="text" label="Title" required />
-        <.input
-          field={@form[:url]}
-          type="text"
-          label="YouTube URL"
-          placeholder="https://www.youtube.com/watch?v=..."
-          required
-        />
-        <.input field={@form[:description]} type="textarea" label="Description" />
-        <.input
-          field={@form[:category_id]}
-          type="select"
-          label="Category"
-          options={@categories}
-          prompt="Choose a category"
-        />
+        <.form for={@form} id="video-form" phx-submit="save" class="space-y-4">
+          <.input field={@form[:title]} type="text" label="Title" required />
+          <.input
+            field={@form[:url]}
+            type="text"
+            label="YouTube URL"
+            placeholder="https://www.youtube.com/watch?v=..."
+            required
+          />
+          <.input field={@form[:description]} type="textarea" label="Description" />
+          <.input
+            field={@form[:category_id]}
+            type="select"
+            label="Category"
+            options={@categories}
+            prompt="Choose a category"
+          />
 
-        <div>
-          <.button id="save-video-button">Save Video</.button>
-        </div>
-      </.form>
+          <div class="flex items-center justify-between pt-2">
+            <.back navigate={~p"/videos"}>Back to videos</.back>
+            <.button id="save-video-button">Save Video</.button>
+          </div>
+        </.form>
 
-      <.back navigate={~p"/videos"}>Back to videos</.back>
+        <section
+          id="new-video-category-tools"
+          class="mt-6 rounded-xl border border-base-300 bg-base-200/50 p-4"
+        >
+          <p class="text-sm font-semibold text-base-content">Manage Categories</p>
+          <p class="mt-1 text-xs text-base-content/70">
+            Add a category or remove one you no longer need.
+          </p>
+
+          <.form
+            for={@category_form}
+            id="new-video-category-form"
+            phx-submit="create_category"
+            class="mt-4 flex items-end gap-2"
+          >
+            <.input
+              field={@category_form[:name]}
+              type="text"
+              label="New category"
+              placeholder="Category name"
+              required
+              class="flex-1"
+            />
+            <.button id="new-video-category-add" type="submit">Add</.button>
+          </.form>
+
+          <div class="mt-4 flex flex-wrap gap-2">
+            <span
+              :for={category <- @category_items}
+              class="inline-flex items-center gap-2 rounded-full border border-base-300 bg-base-100 px-3 py-1 text-xs"
+            >
+              {category.name}
+              <button
+                id={"new-video-category-delete-#{category.id}"}
+                type="button"
+                phx-click="delete_category"
+                phx-value-id={category.id}
+                data-confirm="Delete this category?"
+                class="font-bold text-red-600 hover:text-red-500"
+              >
+                x
+              </button>
+            </span>
+          </div>
+        </section>
+      </section>
     <% :edit -> %>
       <.header>
         Edit Video
@@ -109,6 +161,52 @@
           <.button id="save-video-button">Save Changes</.button>
         </div>
       </.form>
+
+      <section
+        id="edit-video-category-tools"
+        class="mt-6 rounded-xl border border-base-300 bg-base-200/50 p-4"
+      >
+        <p class="text-sm font-semibold text-base-content">Manage Categories</p>
+        <p class="mt-1 text-xs text-base-content/70">
+          Add a category or remove one you no longer need.
+        </p>
+
+        <.form
+          for={@category_form}
+          id="edit-video-category-form"
+          phx-submit="create_category"
+          class="mt-4 flex items-end gap-2"
+        >
+          <.input
+            field={@category_form[:name]}
+            type="text"
+            label="New category"
+            placeholder="Category name"
+            required
+            class="flex-1"
+          />
+          <.button id="edit-video-category-add" type="submit">Add</.button>
+        </.form>
+
+        <div class="mt-4 flex flex-wrap gap-2">
+          <span
+            :for={category <- @category_items}
+            class="inline-flex items-center gap-2 rounded-full border border-base-300 bg-base-100 px-3 py-1 text-xs"
+          >
+            {category.name}
+            <button
+              id={"edit-video-category-delete-#{category.id}"}
+              type="button"
+              phx-click="delete_category"
+              phx-value-id={category.id}
+              data-confirm="Delete this category?"
+              class="font-bold text-red-600 hover:text-red-500"
+            >
+              x
+            </button>
+          </span>
+        </div>
+      </section>
 
       <div class="mt-8 flex gap-4">
         <.back navigate={~p"/videos/#{@video}"}>Back to video</.back>
@@ -301,7 +399,9 @@
                         <span class="rounded bg-base-300 px-2 py-1 text-xs font-mono text-base-content">
                           {format_time(annotation.at)}
                         </span>
-                        <span class="font-semibold text-base-content">{annotation.user.username}</span>
+                        <span class="font-semibold text-base-content">
+                          {annotation.user.username}
+                        </span>
                       </div>
                       <%= if @current_user && annotation.user.id == @current_user.id do %>
                         <div class="relative">

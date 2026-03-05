@@ -93,6 +93,7 @@ const VideoWatch = {
   mounted() {
     const token = this.el.dataset.userToken
     const videoId = this.el.dataset.id
+    this.videoId = Number.parseInt(videoId || "", 10)
     this.roomCode = this.el.dataset.roomCode
     this.roomHostId = Number.parseInt(this.el.dataset.roomHostId || "", 10)
     this.initialRoomPlaying = this.el.dataset.roomPlaying === "true"
@@ -112,7 +113,7 @@ const VideoWatch = {
     this.videoSocket.connect()
 
     this.channel = this.videoSocket.channel(`video:${videoId}`, {})
-    this.channel.on("new_annotation", annotation => this.renderAnnotation(annotation))
+    this.channel.on("new_annotation", annotation => this.renderAnnotation(annotation, {animate: true}))
     this.channel.on("annotation_updated", annotation => this.updateAnnotation(annotation))
     this.channel.on("annotation_deleted", payload => this.removeAnnotation(payload.id))
     this.channel
@@ -229,6 +230,7 @@ const VideoWatch = {
   setupRoomSync() {
     this.roomChannel = this.videoSocket.channel(`watch_room:${this.roomCode}`, {})
     this.roomChannel.on("playback_synced", payload => this.applyRoomSync(payload))
+    this.roomChannel.on("video_changed", payload => this.handleRoomVideoChanged(payload))
 
     this.roomChannel
       .join()
@@ -239,6 +241,19 @@ const VideoWatch = {
       .receive("error", reason => {
         console.error("Watch room sync join failed", reason)
       })
+  },
+
+  handleRoomVideoChanged(payload) {
+    if (!payload?.video_slug || !payload?.room_code) {
+      return
+    }
+
+    if (Number.isInteger(this.videoId) && payload.video_id === this.videoId) {
+      return
+    }
+
+    const roomCode = encodeURIComponent(payload.room_code)
+    window.location.assign(`/watch/${payload.video_slug}?room_code=${roomCode}`)
   },
 
   async setupLocalPlayerForAnnotations() {
@@ -376,7 +391,8 @@ const VideoWatch = {
     }, 250)
   },
 
-  renderAnnotation(annotation) {
+  renderAnnotation(annotation, options = {}) {
+    const {animate = false} = options
     const container = this.el.querySelector("#annotations")
     if (!container) {
       return
@@ -388,6 +404,9 @@ const VideoWatch = {
     }
 
     const wrapper = this.buildAnnotationElement(annotation)
+    if (animate) {
+      wrapper.classList.add("annotation-drop-in")
+    }
     container.appendChild(wrapper)
     wrapper.scrollIntoView({behavior: "smooth", block: "nearest"})
   },
@@ -395,7 +414,7 @@ const VideoWatch = {
   updateAnnotation(annotation) {
     const existing = document.getElementById(`annotation-${annotation.id}`)
     if (!existing) {
-      this.renderAnnotation(annotation)
+      this.renderAnnotation(annotation, {animate: false})
       return
     }
 
@@ -471,7 +490,8 @@ const VideoWatch = {
   buildAnnotationElement(annotation) {
     const wrapper = document.createElement("div")
     wrapper.id = `annotation-${annotation.id}`
-    wrapper.className = "annotation rounded-lg border border-base-300 bg-base-200 p-3 shadow-sm"
+    wrapper.className =
+      "annotation group rounded-2xl border border-base-300/80 bg-base-200/70 p-3.5 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md"
     wrapper.dataset.id = annotation.id
     wrapper.dataset.at = annotation.at
 
@@ -479,14 +499,14 @@ const VideoWatch = {
     header.className = "flex items-center justify-between gap-2"
 
     const meta = document.createElement("div")
-    meta.className = "flex items-center gap-2"
+    meta.className = "flex min-w-0 items-center gap-2"
 
     const time = document.createElement("span")
-    time.className = "rounded bg-base-300 px-2 py-1 text-xs font-mono text-base-content"
+    time.className = "shrink-0 rounded-md bg-base-300 px-2 py-1 text-xs font-mono text-base-content"
     time.textContent = this.formatTime(annotation.at)
 
     const user = document.createElement("span")
-    user.className = "font-semibold text-base-content"
+    user.className = "truncate font-semibold text-base-content"
     user.textContent = annotation.user.username
 
     meta.append(time, user)
@@ -528,7 +548,7 @@ const VideoWatch = {
     }
 
     const body = document.createElement("p")
-    body.className = "annotation-body mt-1 text-base-content/80"
+    body.className = "annotation-body mt-2 text-sm leading-relaxed text-base-content/80"
     body.textContent = annotation.body
 
     wrapper.append(header, body)

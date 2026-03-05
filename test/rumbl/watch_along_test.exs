@@ -4,6 +4,7 @@ defmodule Rumbl.WatchAlongTest do
   alias Rumbl.WatchAlong
 
   test "module is available for watch-along context work" do
+    assert Code.ensure_loaded?(WatchAlong)
     assert function_exported?(WatchAlong, :create_room, 3)
     assert function_exported?(WatchAlong, :join_room, 3)
   end

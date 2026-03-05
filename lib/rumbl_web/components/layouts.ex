@@ -4,6 +4,7 @@ defmodule RumblWeb.Layouts do
   used by your application.
   """
   use RumblWeb, :html
+  alias Rumbl.WatchAlong
 
   # Embed all files in layouts/* within this module.
   # The default root.html.heex file contains the HTML
@@ -27,6 +28,13 @@ defmodule RumblWeb.Layouts do
   """
   attr :flash, :map, required: true, doc: "the map of flash messages"
   attr :current_user, :map, default: nil, doc: "the current logged in user"
+  attr :full_width, :boolean, default: false, doc: "whether to render page content at full width"
+
+  attr :sticky_nav, :boolean,
+    default: false,
+    doc: "whether navbar should be sticky with hero styling"
+
+  attr :joined_rooms, :list, default: nil, doc: "active rooms user has joined or hosted"
 
   attr :current_scope, :map,
     default: nil,
@@ -35,6 +43,20 @@ defmodule RumblWeb.Layouts do
   slot :inner_block, required: true
 
   def app(assigns) do
+    joined_rooms =
+      case assigns[:joined_rooms] do
+        rooms when is_list(rooms) ->
+          rooms
+
+        _ ->
+          case assigns.current_user do
+            nil -> []
+            user -> WatchAlong.list_user_active_rooms(user)
+          end
+      end
+
+    assigns = assign(assigns, :joined_rooms, joined_rooms)
+
     ~H"""
     <div
       id="sidebar-backdrop"
@@ -72,12 +94,39 @@ defmodule RumblWeb.Layouts do
               Join Watch Room
             </.link>
             <.link
-              navigate={~p"/videos"}
+              navigate={~p"/watch-rooms/join"}
               class="block rounded-lg px-3 py-2 hover:bg-base-200"
             >
               Create Watch Room
             </.link>
           </nav>
+
+          <section :if={@joined_rooms != []} id="sidebar-joined-rooms" class="mt-5">
+            <p class="mb-2 px-3 text-xs font-semibold uppercase tracking-wide text-base-content/60">
+              Active Rooms
+            </p>
+            <nav class="space-y-1">
+              <.link
+                :for={room <- @joined_rooms}
+                id={"sidebar-room-#{room.code}"}
+                navigate={~p"/watch-rooms/#{room.code}"}
+                class="block rounded-lg px-3 py-2 hover:bg-base-200"
+              >
+                <div class="flex items-center justify-between gap-2">
+                  <span class="font-mono text-xs tracking-wider">{room.code}</span>
+                  <span
+                    :if={room.host_id == @current_user.id}
+                    class="text-[10px] uppercase text-brand"
+                  >
+                    Host
+                  </span>
+                </div>
+                <p class="mt-1 line-clamp-1 text-xs text-base-content/70">
+                  {if room.video, do: room.video.title, else: "No video selected"}
+                </p>
+              </.link>
+            </nav>
+          </section>
         </div>
       <% else %>
         <div class="flex h-full flex-col p-4">
@@ -113,7 +162,11 @@ defmodule RumblWeb.Layouts do
         </div>
       <% end %>
     </aside>
-    <header class="navbar relative border-b border-base-300 bg-base-100">
+    <header class={[
+      "navbar border-b border-white/15 bg-[#2d1846]/82 text-[#ffb36b] backdrop-blur-xl",
+      @sticky_nav && "sticky top-0 z-[70]",
+      !@sticky_nav && "relative"
+    ]}>
       <button
         id="sidebar-toggle"
         class="btn btn-square btn-ghost"
@@ -220,7 +273,11 @@ defmodule RumblWeb.Layouts do
     </header>
 
     <main class="px-4 py-10 sm:px-6 lg:px-8">
-      <div class="mx-auto max-w-4xl space-y-4">
+      <div class={[
+        "mx-auto space-y-4",
+        @full_width && "w-full max-w-none",
+        !@full_width && "max-w-4xl"
+      ]}>
         {render_slot(@inner_block)}
       </div>
     </main>

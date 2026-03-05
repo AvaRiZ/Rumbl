@@ -40,6 +40,13 @@ defmodule RumblWeb.WatchRoomChannel do
               end
               |> case do
                 :ok ->
+                  _ =
+                    Phoenix.PubSub.broadcast(
+                      Rumbl.PubSub,
+                      room_members_topic(room.code),
+                      {:room_members_changed, %{room_code: room.code}}
+                    )
+
                   send(self(), {:after_join, topic})
 
                   {:ok,
@@ -81,6 +88,14 @@ defmodule RumblWeb.WatchRoomChannel do
 
       {room, user} ->
         _ = WatchAlong.leave_room(room, user)
+
+        _ =
+          Phoenix.PubSub.broadcast(
+            Rumbl.PubSub,
+            room_members_topic(room.code),
+            {:room_members_changed, %{room_code: room.code}}
+          )
+
         :ok
     end
   end
@@ -141,6 +156,8 @@ defmodule RumblWeb.WatchRoomChannel do
   defp room_role(room, user) do
     if room.host_id == user.id, do: "host", else: "viewer"
   end
+
+  defp room_members_topic(room_code), do: "watch_room_live:#{room_code}"
 
   defp parse_action(action) when action in ["play", "pause", "seek", "state"], do: {:ok, action}
   defp parse_action(_), do: {:error, "Invalid playback action"}

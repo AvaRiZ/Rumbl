@@ -4,6 +4,7 @@ defmodule RumblWeb.VideoLive do
   alias Rumbl.Multimedia
   alias Rumbl.Multimedia.Video
   alias Rumbl.WatchAlong
+  alias RumblWeb.Endpoint
 
   embed_templates "video_live/*"
 
@@ -20,7 +21,11 @@ defmodule RumblWeb.VideoLive do
      |> assign(:room_host_id, nil)
      |> assign(:room_playing, false)
      |> assign(:room_current_ms, 0)
-     |> assign(:created_room_code, nil)
+     |> assign(:room, nil)
+     |> assign(:host_videos, [])
+     |> assign(:host_video_options, [])
+     |> assign(:can_manage_room?, false)
+     |> assign(:room_video_form, to_form(%{"video_id" => ""}, as: :room_video))
      |> assign(:annotations, [])
      |> assign(:categories, [])
      |> assign(:category_items, [])
@@ -49,35 +54,6 @@ defmodule RumblWeb.VideoLive do
      socket
      |> assign(:videos, videos)
      |> put_flash(:info, "Video deleted successfully.")}
-  end
-
-  @impl true
-  def handle_event("create_code", _params, socket) do
-    case socket.assigns.current_user do
-      nil ->
-        {:noreply,
-         socket
-         |> assign(:created_room_code, nil)
-         |> put_flash(:error, "You must be logged in to create a room code.")}
-
-      current_user ->
-        case WatchAlong.create_room(current_user, socket.assigns.video) do
-          {:ok, room} ->
-            {:noreply,
-             socket
-             |> assign(:created_room_code, room.code)
-             |> put_flash(:info, "Room code #{room.code} created. Share it to invite others.")
-             |> push_navigate(to: ~p"/watch/#{socket.assigns.video}?#{[room_code: room.code]}")}
-
-          {:error, %Ecto.Changeset{}} ->
-            {:noreply, put_flash(socket, :error, "Failed to create watch room code.")}
-        end
-    end
-  end
-
-  @impl true
-  def handle_event("clear_code", _params, socket) do
-    {:noreply, assign(socket, :created_room_code, nil)}
   end
 
   @impl true
@@ -118,6 +94,56 @@ defmodule RumblWeb.VideoLive do
     end
   end
 
+  @impl true
+  def handle_event("switch_room_video", %{"room_video" => %{"video_id" => video_id}}, socket) do
+    room = socket.assigns.room
+    current_user = socket.assigns.current_user
+
+    cond do
+      is_nil(room) ->
+        {:noreply, put_flash(socket, :error, "Room not found")}
+
+      is_nil(current_user) or current_user.id != room.host_id ->
+        {:noreply, put_flash(socket, :error, "Only the host can change the room video")}
+
+      true ->
+        with {:ok, selected_video_id} <- parse_video_id(video_id),
+             %{} = video <- Enum.find(socket.assigns.host_videos, &(&1.id == selected_video_id)),
+             {:ok, updated_room} <- WatchAlong.set_room_video(room, video) do
+          room = WatchAlong.get_room!(updated_room.id)
+          payload = room_video_payload(room, video)
+
+          _ = Endpoint.broadcast("watch_room:#{room.code}", "video_changed", payload)
+
+          _ =
+            Phoenix.PubSub.broadcast(
+              Rumbl.PubSub,
+              "watch_room_live:#{room.code}",
+              {:room_video_changed, payload}
+            )
+
+          {:noreply,
+           socket
+           |> assign(:room, room)
+           |> assign(
+             :room_video_form,
+             to_form(%{"video_id" => Integer.to_string(video.id)}, as: :room_video)
+           )
+           |> put_flash(:info, "Now playing #{video.title}")
+           |> push_navigate(to: ~p"/watch/#{video}?#{[room_code: room.code]}")}
+        else
+          {:error, :invalid_video} ->
+            {:noreply, put_flash(socket, :error, "Select a valid video")}
+
+          nil ->
+            {:noreply, put_flash(socket, :error, "Video is not available for this host")}
+
+          {:error, %Ecto.Changeset{}} ->
+            {:noreply, put_flash(socket, :error, "Failed to update room video")}
+        end
+    end
+  end
+
   defp apply_action(socket, :index, _params) do
     socket
     |> assign(:page_title, "My Videos")
@@ -142,7 +168,11 @@ defmodule RumblWeb.VideoLive do
     |> assign(:room_host_id, nil)
     |> assign(:room_playing, false)
     |> assign(:room_current_ms, 0)
-    |> assign(:created_room_code, nil)
+    |> assign(:room, nil)
+    |> assign(:host_videos, [])
+    |> assign(:host_video_options, [])
+    |> assign(:can_manage_room?, false)
+    |> assign(:room_video_form, to_form(%{"video_id" => ""}, as: :room_video))
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
@@ -158,6 +188,7 @@ defmodule RumblWeb.VideoLive do
 
   defp apply_action(socket, :watch, %{"id" => id} = params) do
     video = Multimedia.get_video!(id)
+    current_user = socket.assigns.current_user
 
     room_code =
       case params["room_code"] do
@@ -177,9 +208,23 @@ defmodule RumblWeb.VideoLive do
           end
       end
 
+    can_manage_room? =
+      not is_nil(room) and
+        not is_nil(current_user) and
+        current_user.id == room.host_id
+
+    host_videos =
+      if can_manage_room? do
+        Multimedia.list_user_videos(current_user)
+      else
+        []
+      end
+
+    selected_video_id = if(room && room.video_id, do: Integer.to_string(room.video_id), else: "")
+
     user_token =
-      if socket.assigns.current_user do
-        Phoenix.Token.sign(RumblWeb.Endpoint, "user socket", socket.assigns.current_user.id)
+      if current_user do
+        Phoenix.Token.sign(RumblWeb.Endpoint, "user socket", current_user.id)
       end
 
     socket
@@ -189,7 +234,11 @@ defmodule RumblWeb.VideoLive do
     |> assign(:room_host_id, if(room, do: room.host_id, else: nil))
     |> assign(:room_playing, if(room, do: room.playing, else: false))
     |> assign(:room_current_ms, if(room, do: room.current_ms, else: 0))
-    |> assign(:created_room_code, nil)
+    |> assign(:room, room)
+    |> assign(:host_videos, host_videos)
+    |> assign(:host_video_options, host_video_options(host_videos))
+    |> assign(:can_manage_room?, can_manage_room?)
+    |> assign(:room_video_form, to_form(%{"video_id" => selected_video_id}, as: :room_video))
     |> assign(:annotations, Multimedia.list_annotations(video))
     |> assign(:user_token, user_token)
   end
@@ -249,6 +298,27 @@ defmodule RumblWeb.VideoLive do
   end
 
   defp empty_category_form, do: to_form(%{"name" => ""}, as: :category)
+
+  defp parse_video_id(video_id) when is_binary(video_id) do
+    case Integer.parse(video_id) do
+      {parsed, ""} when parsed > 0 -> {:ok, parsed}
+      _ -> {:error, :invalid_video}
+    end
+  end
+
+  defp parse_video_id(_), do: {:error, :invalid_video}
+
+  defp host_video_options(videos) do
+    Enum.map(videos, &{"#{&1.title} (#{&1.slug})", &1.id})
+  end
+
+  defp room_video_payload(room, video) do
+    %{
+      room_code: room.code,
+      video_id: video.id,
+      video_slug: video.slug
+    }
+  end
 
   defp youtube_id(video), do: Video.youtube_id(video)
 

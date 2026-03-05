@@ -1,6 +1,7 @@
 defmodule Rumbl.WatchAlong.WatchRoom do
   @moduledoc """
-  The WatchRoom schema represents a virtual room where users can watch a video together in sync. It includes fields for the room code, title, status (active or ended), whether the video is currently playing, the current playback position in milliseconds, and timestamps for when the room was last synced. Each watch room is associated with a specific video and has a host user who created the room. Additionally, it has many members who have joined the room to watch the video together.
+  The WatchRoom schema represents a virtual room where users can watch videos together in sync.
+  A room is created first and can later be assigned to different videos by the host.
   """
   use Ecto.Schema
   import Ecto.Changeset
@@ -36,7 +37,7 @@ defmodule Rumbl.WatchAlong.WatchRoom do
       :video_id,
       :host_id
     ])
-    |> validate_required([:code, :status, :video_id, :host_id])
+    |> validate_required([:code, :status, :host_id])
     |> validate_inclusion(:status, ["active", "ended"])
     |> validate_number(:current_ms, greater_than_or_equal_to: 0)
     |> unique_constraint(:code)

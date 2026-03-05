@@ -1,4 +1,4 @@
-<Layouts.app flash={@flash} current_user={@current_user}>
+<Layouts.app flash={@flash} current_user={@current_user} full_width={@live_action == :watch}>
   <%= case @live_action do %>
     <% :index -> %>
       <section class="rounded-2xl border border-base-300 bg-base-200/70 p-6 shadow-sm">
@@ -224,44 +224,11 @@
           <.link navigate={~p"/watch/#{@video}"}>
             <.button id="watch-video-button">Watch Video</.button>
           </.link>
+          <.link navigate={~p"/watch-rooms/join"}>
+            <.button id="open-watch-room-lobby-button">Open Watch Rooms</.button>
+          </.link>
         </:actions>
       </.header>
-
-      <.button id="create-room-code-button" phx-click="create_code">
-        Create Room Code
-      </.button>
-
-      <%= if @created_room_code do %>
-        <section
-          id="created-room-code-panel"
-          class="mt-4 rounded-xl border border-base-300 bg-base-100 p-4 shadow-sm"
-        >
-          <p class="text-sm text-base-content/70">Share this code:</p>
-          <p
-            id="created-room-code-value"
-            class="mt-1 font-mono text-2xl font-bold tracking-[0.3em] text-base-content"
-          >
-            {@created_room_code}
-          </p>
-          <div class="mt-3 flex flex-wrap items-center gap-2">
-            <.link
-              id="open-created-room-link"
-              navigate={~p"/watch-rooms/#{@created_room_code}"}
-              class="btn btn-sm"
-            >
-              Open Room
-            </.link>
-            <button
-              id="clear-created-room-code"
-              type="button"
-              phx-click="clear_code"
-              class="btn btn-sm btn-ghost"
-            >
-              Hide Code
-            </button>
-          </div>
-        </section>
-      <% end %>
 
       <.list>
         <:item title="Title">{@video.title}</:item>
@@ -285,176 +252,274 @@
         <.back navigate={~p"/videos"}>Back to videos</.back>
       </div>
     <% :watch -> %>
-      <div class="mx-auto max-w-7xl" id="video-watch-root">
-        <.header>
-          {@video.title}
-          <:subtitle>
-            Added by {@video.user.name}
-            <%= if @video.category do %>
-              in {@video.category.name}
-            <% end %>
-          </:subtitle>
-        </.header>
-
-        <%= if @room_code do %>
-          <section
-            id="watch-room-code-banner"
-            class="mt-4 rounded-xl border border-base-300 bg-base-100 p-3 shadow-sm"
-          >
-            <p class="text-sm text-base-content/70">Watch Room Code</p>
-            <p class="font-mono text-lg font-semibold tracking-[0.2em]">{@room_code}</p>
-          </section>
-        <% end %>
-
-        <div
-          class="mt-6"
-          id="video-watch-hook"
-          phx-hook="VideoWatch"
-          phx-update="ignore"
-          data-id={@video.id}
-          data-user-token={@user_token || ""}
-          data-current-user-id={if(@current_user, do: @current_user.id, else: "")}
-          data-room-code={@room_code || ""}
-          data-room-host-id={@room_host_id || ""}
-          data-room-playing={to_string(@room_playing)}
-          data-room-current-ms={@room_current_ms}
-        >
-          <div class="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.65fr)_minmax(18rem,0.65fr)]">
-            <div>
-              <div
-                id="video-container"
-                data-id={@video.id}
-                data-player-id="video-player"
-                class="aspect-video bg-black rounded-lg overflow-hidden"
-              >
-                <%= if youtube_id(@video) do %>
-                  <iframe
-                    id="video-player"
-                    width="100%"
-                    height="100%"
-                    src={youtube_embed_url(@video)}
-                    frameborder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowfullscreen
-                  >
-                  </iframe>
-                <% else %>
-                  <div class="flex items-center justify-center h-full text-white">
-                    <p>Unable to load video. Invalid YouTube URL.</p>
-                  </div>
-                <% end %>
-              </div>
-
-              <%= if @video.description do %>
-                <div class="mt-4 rounded-lg border border-base-300 bg-base-200 p-4">
-                  <h3 class="font-semibold text-base-content">Description</h3>
-                  <p class="mt-2 text-base-content/80">{@video.description}</p>
+      <section id="video-watch-root" class="relative isolate w-full pb-10">
+        <div class="pointer-events-none absolute inset-x-0 -top-12 -z-10 h-64 bg-[radial-gradient(900px_260px_at_20%_0%,rgba(253,79,0,0.18),transparent_70%)]">
+        </div>
+        <div class="mx-auto w-full max-w-[1500px] px-4 sm:px-6 lg:px-10">
+          <section class="rounded-3xl border border-base-300/80 bg-base-100/90 p-6 shadow-xl shadow-base-300/30 backdrop-blur sm:p-8">
+            <div class="flex flex-wrap items-start justify-between gap-4">
+              <div class="max-w-4xl">
+                <p class="text-xs font-semibold uppercase tracking-[0.24em] text-base-content/55">
+                  Video Player
+                </p>
+                <h1 class="mt-2 text-2xl font-black leading-tight text-base-content sm:text-3xl lg:text-4xl">
+                  {@video.title}
+                </h1>
+                <div class="mt-4 flex flex-wrap items-center gap-2">
+                  <span class="inline-flex items-center gap-2 rounded-full border border-base-300 bg-base-200/70 px-3 py-1 text-xs font-medium text-base-content/85">
+                    <.icon name="hero-user" class="size-4" />
+                    {@video.user.name}
+                  </span>
+                  <%= if @video.category do %>
+                    <span class="inline-flex items-center gap-2 rounded-full border border-base-300 bg-base-200/70 px-3 py-1 text-xs font-medium text-base-content/85">
+                      <.icon name="hero-tag" class="size-4" />
+                      {@video.category.name}
+                    </span>
+                  <% end %>
+                  <%= if @room_code do %>
+                    <span class="inline-flex items-center gap-2 rounded-full border border-primary/45 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+                      <.icon name="hero-users" class="size-4" /> Room mode active
+                    </span>
+                  <% end %>
                 </div>
-              <% end %>
+              </div>
+              <.link
+                navigate={~p"/videos"}
+                class="inline-flex items-center gap-2 rounded-xl border border-base-300 bg-base-100 px-4 py-2 text-sm font-semibold text-base-content transition hover:-translate-y-0.5 hover:bg-base-200"
+              >
+                <.icon name="hero-arrow-left" class="size-4" /> Back to videos
+              </.link>
             </div>
 
-            <aside class="rounded-lg border border-base-300 bg-base-100 p-4 lg:max-h-[72vh] lg:overflow-y-auto">
-              <h3 class="text-lg font-semibold text-base-content">Annotations</h3>
-
-              <%= if @current_user do %>
-                <form id="annotation-form" class="mt-4">
-                  <div class="flex items-stretch gap-0 [&_.fieldset]:m-0 [&_.fieldset]:p-0 [&_.fieldset]:flex-1 [&_.fieldset>label]:m-0 [&_.fieldset>label]:block [&_.fieldset>label]:h-12">
-                    <.input
-                      id="annotation-body"
-                      name="body"
-                      type="text"
-                      value=""
-                      placeholder="Add a comment at the current time"
-                      class="w-full input h-full rounded-r-none"
-                    />
-                    <input type="hidden" id="annotation-at" name="at" value="0" />
-                    <button
-                      id="annotation-submit"
-                      type="submit"
-                      class="btn self-end h-12 min-h-12 rounded-l-none"
-                    >
-                      Post
-                    </button>
-                  </div>
-                </form>
-              <% else %>
-                <p class="mt-4 text-base-content/70">
-                  <.link navigate={~p"/sessions/new"} class="watch_hover">
-                    Log in
-                  </.link>
-                  to add annotations.
+            <%= if @room_code do %>
+              <section
+                id="watch-room-code-banner"
+                class="mt-6 rounded-2xl border border-primary/40 bg-primary/10 p-4 shadow-sm"
+              >
+                <p class="text-xs uppercase tracking-[0.16em] text-base-content/65">
+                  Watch Room Code
                 </p>
-              <% end %>
+                <div class="mt-2 flex flex-wrap items-center justify-between gap-3">
+                  <p class="font-mono text-xl font-bold tracking-[0.22em] text-base-content">
+                    {@room_code}
+                  </p>
+                  <p class="text-xs text-base-content/70">
+                    Share this code so others can join and sync playback.
+                  </p>
+                </div>
+              </section>
+            <% end %>
 
-              <div id="annotations" class="mt-6 space-y-3">
-                <%= for annotation <- @annotations do %>
-                  <div
-                    id={"annotation-#{annotation.id}"}
-                    class="annotation rounded-lg border border-base-300 bg-base-200 p-3 shadow-sm"
-                    data-id={annotation.id}
-                    data-at={annotation.at}
-                  >
-                    <div class="flex items-center justify-between gap-2">
-                      <div class="flex items-center gap-2">
-                        <span class="rounded bg-base-300 px-2 py-1 text-xs font-mono text-base-content">
-                          {format_time(annotation.at)}
-                        </span>
-                        <span class="font-semibold text-base-content">
-                          {annotation.user.username}
-                        </span>
-                      </div>
-                      <%= if @current_user && annotation.user.id == @current_user.id do %>
-                        <div class="relative">
-                          <button
-                            type="button"
-                            class="btn btn-xs btn-square"
-                            data-menu-toggle
-                            data-id={annotation.id}
-                            aria-label="Annotation actions"
-                          >
-                            <.icon name="hero-ellipsis-horizontal" class="size-4" />
-                          </button>
-                          <div
-                            id={"annotation-menu-#{annotation.id}"}
-                            class="hidden absolute right-0 top-7 z-10 w-28 overflow-hidden rounded-md border border-base-300 bg-base-100 shadow-lg"
-                          >
-                            <button
-                              type="button"
-                              class="block w-full px-3 py-2 text-left text-sm hover:bg-base-200"
-                              data-action="edit"
-                              data-id={annotation.id}
-                            >
-                              Edit
-                            </button>
-                            <button
-                              type="button"
-                              class="block w-full px-3 py-2 text-left text-sm text-error hover:bg-base-200"
-                              data-action="delete"
-                              data-id={annotation.id}
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        </div>
-                      <% end %>
-                    </div>
-                    <p class="annotation-body mt-1 text-base-content/80">{annotation.body}</p>
-                  </div>
-                <% end %>
+            <section
+              :if={@can_manage_room?}
+              id="watch-room-inline-host-controls"
+              class="mt-6 rounded-2xl border border-base-300 bg-base-200/70 p-4 shadow-sm"
+            >
+              <div class="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <h2 class="text-base font-semibold text-base-content">Host Controls</h2>
+                  <p class="mt-1 text-sm text-base-content/70">
+                    Switch videos in this room without leaving the watch page.
+                  </p>
+                </div>
               </div>
 
-              <%= if Enum.empty?(@annotations) do %>
-                <p id="no-annotations" class="mt-4 text-center text-base-content/70">
-                  No annotations yet. Be the first to comment!
+              <%= if @host_video_options == [] do %>
+                <p class="mt-3 text-sm text-base-content/70">
+                  You need at least one uploaded video. <.link
+                    navigate={~p"/videos/new"}
+                    class="watch_hover"
+                  >Add a video</.link>.
                 </p>
+              <% else %>
+                <.form
+                  for={@room_video_form}
+                  id="watch-room-inline-video-form"
+                  phx-submit="switch_room_video"
+                  class="mt-3 flex flex-wrap items-end gap-3"
+                >
+                  <.input
+                    field={@room_video_form[:video_id]}
+                    type="select"
+                    label="Choose video"
+                    options={@host_video_options}
+                    prompt="Select a video"
+                    class="min-w-64 flex-1"
+                  />
+                  <.button id="watch-room-inline-switch-submit">Play in Room</.button>
+                </.form>
               <% end %>
-            </aside>
+            </section>
+          </section>
+
+          <div
+            class="mt-7"
+            id="video-watch-hook"
+            phx-hook="VideoWatch"
+            phx-update="ignore"
+            data-id={@video.id}
+            data-user-token={@user_token || ""}
+            data-current-user-id={if(@current_user, do: @current_user.id, else: "")}
+            data-room-code={@room_code || ""}
+            data-room-host-id={@room_host_id || ""}
+            data-room-playing={to_string(@room_playing)}
+            data-room-current-ms={@room_current_ms}
+          >
+            <div class="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.75fr)_minmax(23rem,0.95fr)] xl:items-start">
+              <div class="space-y-4">
+                <div class="overflow-hidden rounded-3xl border border-base-300/80 bg-base-100 shadow-lg shadow-base-300/30">
+                  <div class="flex items-center justify-between border-b border-base-300/80 bg-base-200/65 px-4 py-3 text-xs font-semibold uppercase tracking-[0.14em] text-base-content/70">
+                    <span>Now Watching</span>
+                    <span>{if @room_code, do: "Synced Room", else: "Solo"}</span>
+                  </div>
+                  <div
+                    id="video-container"
+                    data-id={@video.id}
+                    data-player-id="video-player"
+                    class="aspect-video bg-black"
+                  >
+                    <%= if youtube_id(@video) do %>
+                      <iframe
+                        id="video-player"
+                        width="100%"
+                        height="100%"
+                        src={youtube_embed_url(@video)}
+                        frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen
+                      >
+                      </iframe>
+                    <% else %>
+                      <div class="flex h-full items-center justify-center px-5 text-center text-white/85">
+                        <p>Unable to load video. Invalid YouTube URL.</p>
+                      </div>
+                    <% end %>
+                  </div>
+                </div>
+
+                <div class="rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm sm:p-5">
+                  <h2 class="text-sm font-semibold uppercase tracking-[0.16em] text-base-content/65">
+                    Description
+                  </h2>
+                  <p class="mt-2 text-sm leading-relaxed text-base-content/80 sm:text-base">
+                    {@video.description || "No description provided yet."}
+                  </p>
+                </div>
+              </div>
+
+              <aside class="overflow-hidden rounded-3xl border border-base-300/80 bg-base-100 shadow-lg shadow-base-300/30 xl:sticky xl:top-24">
+                <div class="border-b border-base-300/80 bg-base-200/65 px-4 py-4 sm:px-5">
+                  <div class="flex items-center justify-between gap-3">
+                    <h2 class="text-lg font-bold text-base-content">Live Annotations</h2>
+                    <span class="rounded-full border border-base-300 bg-base-100 px-2.5 py-1 text-xs font-semibold text-base-content/70">
+                      {length(@annotations)}
+                    </span>
+                  </div>
+                  <p class="mt-1 text-sm text-base-content/65">
+                    React to specific moments with timestamped comments.
+                  </p>
+                </div>
+
+                <div class="max-h-[70vh] overflow-y-auto px-4 pb-4 pt-4 sm:px-5">
+                  <%= if @current_user do %>
+                    <form id="annotation-form" class="mt-1">
+                      <div class="flex items-stretch gap-0 rounded-xl border border-base-300 bg-base-100 shadow-sm [&_.fieldset]:m-0 [&_.fieldset]:flex-1 [&_.fieldset]:p-0 [&_.fieldset>label]:m-0 [&_.fieldset>label]:block [&_.fieldset>label]:h-12">
+                        <.input
+                          id="annotation-body"
+                          name="body"
+                          type="text"
+                          value=""
+                          placeholder="Add a comment at the current time"
+                          class="input h-full w-full rounded-r-none border-0 bg-transparent px-4"
+                        />
+                        <input type="hidden" id="annotation-at" name="at" value="0" />
+                        <button
+                          id="annotation-submit"
+                          type="submit"
+                          class="btn h-12 min-h-12 rounded-l-none border-0 px-5 shadow-none transition hover:-translate-y-0.5"
+                        >
+                          Post
+                        </button>
+                      </div>
+                    </form>
+                  <% else %>
+                    <p class="mt-2 text-base-content/70">
+                      <.link navigate={~p"/sessions/new"} class="watch_hover">
+                        Log in
+                      </.link>
+                      to add annotations.
+                    </p>
+                  <% end %>
+
+                  <div id="annotations" class="mt-5 space-y-3">
+                    <%= for annotation <- @annotations do %>
+                      <div
+                        id={"annotation-#{annotation.id}"}
+                        class="annotation group rounded-2xl border border-base-300/80 bg-base-200/70 p-3.5 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md"
+                        data-id={annotation.id}
+                        data-at={annotation.at}
+                      >
+                        <div class="flex items-center justify-between gap-2">
+                          <div class="flex min-w-0 items-center gap-2">
+                            <span class="shrink-0 rounded-md bg-base-300 px-2 py-1 text-xs font-mono text-base-content">
+                              {format_time(annotation.at)}
+                            </span>
+                            <span class="truncate font-semibold text-base-content">
+                              {annotation.user.username}
+                            </span>
+                          </div>
+                          <%= if @current_user && annotation.user.id == @current_user.id do %>
+                            <div class="relative">
+                              <button
+                                type="button"
+                                class="btn btn-ghost btn-xs btn-square"
+                                data-menu-toggle
+                                data-id={annotation.id}
+                                aria-label="Annotation actions"
+                              >
+                                <.icon name="hero-ellipsis-horizontal" class="size-4" />
+                              </button>
+                              <div
+                                id={"annotation-menu-#{annotation.id}"}
+                                class="hidden absolute right-0 top-7 z-10 w-28 overflow-hidden rounded-md border border-base-300 bg-base-100 shadow-lg"
+                              >
+                                <button
+                                  type="button"
+                                  class="block w-full px-3 py-2 text-left text-sm hover:bg-base-200"
+                                  data-action="edit"
+                                  data-id={annotation.id}
+                                >
+                                  Edit
+                                </button>
+                                <button
+                                  type="button"
+                                  class="block w-full px-3 py-2 text-left text-sm text-error hover:bg-base-200"
+                                  data-action="delete"
+                                  data-id={annotation.id}
+                                >
+                                  Delete
+                                </button>
+                              </div>
+                            </div>
+                          <% end %>
+                        </div>
+                        <p class="annotation-body mt-2 text-sm leading-relaxed text-base-content/80">
+                          {annotation.body}
+                        </p>
+                      </div>
+                    <% end %>
+                  </div>
+
+                  <%= if Enum.empty?(@annotations) do %>
+                    <p id="no-annotations" class="mt-4 text-center text-base-content/70">
+                      No annotations yet. Be the first to comment!
+                    </p>
+                  <% end %>
+                </div>
+              </aside>
+            </div>
           </div>
         </div>
-
-        <div class="mt-8">
-          <.back navigate={~p"/videos"}>Back to videos</.back>
-        </div>
-      </div>
+      </section>
   <% end %>
 </Layouts.app>

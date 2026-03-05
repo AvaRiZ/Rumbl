@@ -1,30 +1,188 @@
 <Layouts.app flash={@flash} current_user={@current_user}>
   <%= if @live_action == :join do %>
-    <section class="mx-auto max-w-xl rounded-2xl border border-base-300 bg-base-100 p-6 shadow-sm">
-      <h1 class="text-2xl font-bold">Join a Watch Room</h1>
-      <p class="mt-2 text-sm text-base-content/70">
-        Enter the room code shared by the host to join live playback.
-      </p>
+    <div class="mx-auto grid max-w-5xl gap-6 md:grid-cols-2">
+      <section class="rounded-2xl border border-base-300 bg-base-100 p-6 shadow-sm">
+        <h1 class="text-2xl font-bold">Join a Watch Room</h1>
+        <p class="mt-2 text-sm text-base-content/70">
+          Enter the room code shared by the host to join live playback.
+        </p>
 
-      <.form
-        for={@room_form}
-        id="watch-room-join-form"
-        phx-submit="join_room"
-        class="mt-6 space-y-4"
-      >
-        <.input
-          field={@room_form[:code]}
-          type="text"
-          label="Room Code"
-          placeholder="Example: A1B2C3D4"
-          class="w-full input uppercase tracking-widest"
-        />
-        <.button id="watch-room-join-submit">Join Room</.button>
-      </.form>
-    </section>
+        <.form
+          for={@room_form}
+          id="watch-room-join-form"
+          phx-submit="join_room"
+          class="mt-6 space-y-4"
+        >
+          <.input
+            field={@room_form[:code]}
+            type="text"
+            label="Room Code"
+            placeholder="Example: A1B2C3D4"
+            class="w-full input uppercase tracking-widest"
+          />
+          <.button id="watch-room-join-submit">Join Room</.button>
+        </.form>
+      </section>
+
+      <section class="rounded-2xl border border-base-300 bg-base-100 p-6 shadow-sm">
+        <h2 class="text-xl font-bold text-base-content">Create a New Room</h2>
+        <p class="mt-2 text-sm text-base-content/70">
+          Create one room code first, then switch between your videos anytime.
+        </p>
+
+        <button
+          id="watch-room-create-submit"
+          type="button"
+          phx-click="create_room"
+          class="btn mt-6"
+        >
+          Create Room
+        </button>
+      </section>
+    </div>
   <% else %>
-    <section class="mx-auto max-w-xl rounded-2xl border border-base-300 bg-base-100 p-6 shadow-sm">
-      <p class="text-sm text-base-content/70">Redirecting to room video...</p>
+    <section
+      :if={@room}
+      id="watch-room-lobby"
+      class="mx-auto max-w-4xl rounded-2xl border border-base-300 bg-base-100 p-6 shadow-sm"
+    >
+      <div class="flex flex-wrap items-center justify-between gap-3 border-b border-base-300 pb-4">
+        <div>
+          <h1 class="text-2xl font-bold text-base-content">Room {@room.code}</h1>
+          <p class="mt-1 text-sm text-base-content/70">
+            Host: {@room.host.username}
+          </p>
+          <p id="watch-room-user-count" class="mt-1 text-sm text-base-content/70">
+            Users in room: {@room_user_count}
+          </p>
+        </div>
+        <span class="rounded-full border border-base-300 bg-base-200 px-3 py-1 text-xs font-semibold uppercase">
+          {@room.status}
+        </span>
+      </div>
+
+      <section
+        id="watch-room-members"
+        class="mt-6 rounded-xl border border-base-300 bg-base-200/50 p-4"
+      >
+        <h2 class="text-lg font-semibold text-base-content">Room Members</h2>
+
+        <div id="watch-room-members-list" class="mt-4 space-y-2">
+          <%= for member <- @room.members || [] do %>
+            <div
+              id={"watch-room-member-#{member.user_id}"}
+              class="flex items-center justify-between rounded-lg border border-base-300 bg-base-100 px-3 py-2"
+            >
+              <div class="flex items-center gap-2 text-sm text-base-content">
+                <span class="font-medium">{member.user.username}</span>
+                <span class="rounded-full border border-base-300 bg-base-200 px-2 py-0.5 text-xs uppercase">
+                  {member.role}
+                </span>
+              </div>
+
+              <button
+                :if={@can_manage_room? && member.user_id != @room.host_id}
+                id={"watch-room-remove-member-#{member.user_id}"}
+                type="button"
+                phx-click="remove_member"
+                phx-value-user_id={member.user_id}
+                class="btn btn-sm btn-ghost text-error"
+              >
+                Remove
+              </button>
+            </div>
+          <% end %>
+        </div>
+      </section>
+
+      <section
+        id="watch-room-current-video"
+        class="mt-6 rounded-xl border border-base-300 bg-base-200/50 p-4"
+      >
+        <h2 class="text-lg font-semibold text-base-content">Now Playing</h2>
+        <%= if @room.video do %>
+          <p
+            id="watch-room-current-video-title"
+            class="mt-2 text-base font-medium text-base-content"
+          >
+            {@room.video.title}
+          </p>
+          <div class="mt-4 flex flex-wrap gap-2">
+            <button
+              id="watch-room-open-player-link"
+              type="button"
+              phx-click="open_current_video"
+              class="btn"
+            >
+              Open Player
+            </button>
+          </div>
+        <% else %>
+          <p id="watch-room-empty-state" class="mt-2 text-sm text-base-content/70">
+            Host has not started a video yet.
+          </p>
+        <% end %>
+      </section>
+
+      <section
+        :if={@can_manage_room?}
+        id="watch-room-host-controls"
+        class="mt-6 rounded-xl border border-base-300 bg-base-200/50 p-4"
+      >
+        <h2 class="text-lg font-semibold text-base-content">Host Controls</h2>
+        <p class="mt-1 text-sm text-base-content/70">
+          Pick any of your videos to play in this same room code.
+        </p>
+
+        <%= if @host_video_options == [] do %>
+          <p class="mt-4 text-sm text-base-content/70">
+            You need at least one uploaded video. <.link
+              navigate={~p"/videos/new"}
+              class="watch_hover"
+            >Add a video</.link>.
+          </p>
+        <% else %>
+          <.form
+            for={@room_video_form}
+            id="watch-room-video-form"
+            phx-submit="select_video"
+            class="mt-4 flex flex-wrap items-end gap-3"
+          >
+            <.input
+              field={@room_video_form[:video_id]}
+              type="select"
+              label="Choose video"
+              options={@host_video_options}
+              prompt="Select a video"
+              class="min-w-64 flex-1"
+            />
+            <.button id="watch-room-play-selected">Play in Room</.button>
+          </.form>
+        <% end %>
+      </section>
+
+      <section id="watch-room-actions" class="mt-6 flex flex-wrap gap-2">
+        <button
+          :if={!@can_manage_room?}
+          id="watch-room-leave-button"
+          type="button"
+          phx-click="leave_room"
+          class="btn btn-outline"
+        >
+          Leave Room
+        </button>
+
+        <button
+          :if={@can_manage_room?}
+          id="watch-room-delete-button"
+          type="button"
+          phx-click="delete_room"
+          data-confirm="Delete this room for everyone?"
+          class="btn btn-outline text-error"
+        >
+          Delete Room
+        </button>
+      </section>
     </section>
   <% end %>
 </Layouts.app>

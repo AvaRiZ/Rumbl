@@ -2938,3 +2938,23 @@ Command-line arguments:  -os linux -ws gtk -arch x86_64 -eclipse.keyring /home/y
 
 !ENTRY org.eclipse.ui 2 2 2026-02-27 08:06:07.369
 !MESSAGE Invalid preference category path: org.eclipse.debug.ui.ConsolePreferencePage (bundle: org.eclipse.ui.console, page: org.eclipse.ui.internal.console.ansi.preferences.AnsiConsolePreferencePage)
+!SESSION 2026-03-03 00:13:03.422 -----------------------------------------------
+eclipse.buildId=unknown
+java.version=21.0.8
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=linux, ARCH=x86_64, WS=gtk, NL=en
+Framework arguments:  -eclipse.keyring /home/yajito/.local/share/DBeaverData/secure/secure_storage
+Command-line arguments:  -os linux -ws gtk -arch x86_64 -eclipse.keyring /home/yajito/.local/share/DBeaverData/secure/secure_storage
+
+!ENTRY org.eclipse.ui 2 2 2026-03-03 00:13:12.247
+!MESSAGE Invalid preference category path: org.eclipse.debug.ui.ConsolePreferencePage (bundle: org.eclipse.ui.console, page: org.eclipse.ui.internal.console.ansi.preferences.AnsiConsolePreferencePage)
+!SESSION 2026-03-05 07:58:35.919 -----------------------------------------------
+eclipse.buildId=unknown
+java.version=21.0.8
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=linux, ARCH=x86_64, WS=gtk, NL=en
+Framework arguments:  -eclipse.keyring /home/yajito/.local/share/DBeaverData/secure/secure_storage
+Command-line arguments:  -os linux -ws gtk -arch x86_64 -eclipse.keyring /home/yajito/.local/share/DBeaverData/secure/secure_storage
+
+!ENTRY org.eclipse.ui 2 2 2026-03-05 07:58:56.801
+!MESSAGE Invalid preference category path: org.eclipse.debug.ui.ConsolePreferencePage (bundle: org.eclipse.ui.console, page: org.eclipse.ui.internal.console.ansi.preferences.AnsiConsolePreferencePage)

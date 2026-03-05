@@ -1,0 +1,11 @@
+11872:APP_OPEN:startTime=1772697520112
+17908:GENERAL_SHOW_PERSPECTIVE:perspective=org.jkiss.dbeaver.core.perspective
+24363:ENTITY_EDITOR_OPEN:driver=postgresql:postgres-jdbc&className=PostgreTableRegular
+33872:DATA_EDIT_OPEN:objectType=PostgreTableRegular
+40421:ENTITY_EDITOR_OPEN:driver=postgresql:postgres-jdbc&className=PostgreTableRegular
+40632:DATA_EDIT_OPEN:objectType=PostgreTableRegular
+44910:ENTITY_EDITOR_OPEN:driver=postgresql:postgres-jdbc&className=PostgreSchema
+52383:ENTITY_EDITOR_OPEN:driver=postgresql:postgres-jdbc&className=PostgreTableRegular
+52518:DATA_EDIT_OPEN:objectType=PostgreTableRegular
+63040:ENTITY_EDITOR_OPEN:driver=postgresql:postgres-jdbc&className=PostgreTableRegular
+63183:DATA_EDIT_OPEN:objectType=PostgreTableRegular

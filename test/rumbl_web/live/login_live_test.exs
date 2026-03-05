@@ -38,6 +38,6 @@ defmodule RumblWeb.LoginLiveTest do
       |> render_submit()
 
     # error message with id="session-error" is rendered
-    assert response_html =~ "id=\"video-error\""
+    assert response_html =~ "id=\"session-error\""
   end
 end

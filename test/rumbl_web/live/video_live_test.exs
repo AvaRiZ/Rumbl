@@ -11,6 +11,7 @@ defmodule RumblWeb.VideoLiveTest do
   alias Rumbl.Multimedia
   alias Rumbl.Multimedia.Category
   alias Rumbl.Repo
+  alias Rumbl.WatchAlong
 
   test "adds a video from the new page", %{conn: conn} do
     {:ok, user} =
@@ -185,5 +186,45 @@ defmodule RumblWeb.VideoLiveTest do
     {:ok, view, _html} = live(conn, ~p"/watch/#{video}")
 
     assert has_element?(view, "#annotations .annotation-body", annotation_body)
+  end
+
+  test "host can switch room video from watch page", %{conn: conn} do
+    {:ok, host} =
+      Accounts.register_user(%{
+        "name" => "Watch Host",
+        "username" => "watch_host_user",
+        "password" => "videopass123"
+      })
+
+    category = Repo.insert!(%Category{name: "Testing"})
+
+    {:ok, first_video} =
+      Multimedia.create_video(host, %{
+        "title" => "First Host Video",
+        "url" => "https://www.youtube.com/watch?v=R7t7zca8SyM",
+        "description" => "first host video",
+        "category_id" => category.id
+      })
+
+    {:ok, second_video} =
+      Multimedia.create_video(host, %{
+        "title" => "Second Host Video",
+        "url" => "https://www.youtube.com/watch?v=aqz-KE-bpKQ",
+        "description" => "second host video",
+        "category_id" => category.id
+      })
+
+    {:ok, room} = WatchAlong.create_room(host, first_video)
+
+    conn = init_test_session(conn, %{user_id: host.id})
+    {:ok, view, _html} = live(conn, ~p"/watch/#{first_video}?#{[room_code: room.code]}")
+
+    view
+    |> form("#watch-room-inline-video-form",
+      room_video: %{"video_id" => Integer.to_string(second_video.id)}
+    )
+    |> render_submit()
+
+    assert_redirect(view, ~p"/watch/#{second_video}?#{[room_code: room.code]}")
   end
 end

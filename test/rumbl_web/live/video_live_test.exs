@@ -1,4 +1,8 @@
 defmodule RumblWeb.VideoLiveTest do
+  @moduledoc """
+  Tests for the video live view.
+  """
+
   use RumblWeb.ConnCase, async: true
 
   import Phoenix.LiveViewTest
@@ -123,5 +127,63 @@ defmodule RumblWeb.VideoLiveTest do
     |> render_submit()
 
     assert_redirect(view, ~p"/watch-rooms/TESTCODE")
+  end
+
+  test "watch page renders annotation form", %{conn: conn} do
+    {:ok, user} =
+      Accounts.register_user(%{
+        "name" => "Annotate Test",
+        "username" => "annotate_test_user",
+        "password" => "videopass123"
+      })
+
+    category = Repo.insert!(%Category{name: "Testing"})
+
+    {:ok, video} =
+      Multimedia.create_video(user, %{
+        "title" => "Annotate Test Video",
+        "url" => "https://www.youtube.com/watch?v=R7t7zca8SyM",
+        "description" => "created for annotate test",
+        "category_id" => category.id
+      })
+
+    conn = init_test_session(conn, %{user_id: user.id})
+    {:ok, view, _html} = live(conn, ~p"/watch/#{video}")
+
+    assert has_element?(view, "#annotation-form")
+    assert has_element?(view, "#annotation-body")
+    assert has_element?(view, "#annotation-submit")
+  end
+
+  test "add annotation to video", %{conn: conn} do
+    {:ok, user} =
+      Accounts.register_user(%{
+        "name" => "Add Annotation Test",
+        "username" => "addannotate",
+        "password" => "pass12345"
+      })
+
+    category = Repo.insert!(%Category{name: "Testing"})
+
+    {:ok, video} =
+      Multimedia.create_video(user, %{
+        "title" => "Add Annotation Test Video",
+        "url" => "https://www.youtube.com/watch?v=R7t7zca8SyM",
+        "description" => "created for add annotation test",
+        "category_id" => category.id
+      })
+
+    conn = init_test_session(conn, %{user_id: user.id})
+    annotation_body = "This is a test annotation."
+
+    {:ok, _annotation} =
+      Multimedia.annotate_video(user, video.id, %{
+        "body" => annotation_body,
+        "at" => 1_000
+      })
+
+    {:ok, view, _html} = live(conn, ~p"/watch/#{video}")
+
+    assert has_element?(view, "#annotations .annotation-body", annotation_body)
   end
 end
